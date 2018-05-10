@@ -1270,7 +1270,6 @@ class Page1 extends Component {
                         <Input
                           size="sm"
                           style={{ width: 40 }}
-                          defaultValue={value}
                           value={value}
                           maxLength="3"
                           onChange={e => {
