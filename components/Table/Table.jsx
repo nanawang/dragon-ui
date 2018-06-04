@@ -5,38 +5,97 @@ import Loading from '../Loading';
 import Checkbox from '../Checkbox';
 import Popover from '../Popover';
 import domUtil from '../utils/dom';
+import rAF from '../utils/rAF';
 
 class Table extends Component {
   constructor(props) {
     super(props);
-    let selectedRows =
+    const selectedRows =
       'rowSelection' in props
         ? props.rowSelection.value || props.rowSelection.defaultValue || []
         : [];
     this.state = {
       selectedRows,
       sort: {},
-      fixedColAttrs: {}
+      fixedColAttrs: {},
     };
   }
 
   componentDidMount() {
-    this.getFixedColAttrs();
+    rAF.rAF(() => this.getFixedColAttrs());
   }
 
   componentWillReceiveProps(nextProps) {
     if ('rowSelection' in nextProps && 'value' in nextProps.rowSelection) {
       this.setState({
-        selectedRows: nextProps.rowSelection.value
+        selectedRows: nextProps.rowSelection.value,
       });
     }
     if (nextProps.dataSource !== this.props.dataSource) {
       // 数据变更重新计算固定列高度
-      this.getFixedColAttrs();
+      rAF.rAF(() => this.getFixedColAttrs());
     }
   }
 
-  // 同步单元格高度
+  onSort(column) {
+    const { dataSource } = this.props;
+    const sort = !this.state.sort[column.dataIndex];
+
+    sort ? dataSource.sort(column.sorter) : dataSource.reverse(column.sorter);
+
+    this.setState({
+      sort: {
+        [`${column.dataIndex}`]: sort,
+      },
+    });
+  }
+
+  onEnterTableRow(index) {
+    const { fixedleftTbody, fixedrightTbody, scrollTbody } = this;
+
+    [fixedleftTbody, fixedrightTbody, scrollTbody].forEach((tbody) => {
+      if (tbody) {
+        this.toggleHoverStatus(tbody.querySelectorAll('tr'), index);
+      }
+    });
+  }
+
+  onLeaveTableRow() {
+    this.onEnterTableRow(-1);
+  }
+
+  onScrollTable = (e) => {
+    const { target } = e;
+    const { fixedleftCol, fixedrightCol, scrollTable } = this;
+    const containerWidth = parseInt(
+      domUtil.getStyleComputedProperty(target, 'width'),
+      10
+    );
+    const scrollTableWidth = parseInt(
+      domUtil.getStyleComputedProperty(scrollTable, 'width'),
+      10
+    );
+    const { scrollLeft } = target;
+
+    if (containerWidth < scrollTableWidth) {
+      if (fixedleftCol) {
+        if (scrollLeft > 0) {
+          fixedleftCol.classList.add('shadow');
+        } else {
+          fixedleftCol.classList.remove('shadow');
+        }
+      }
+      if (fixedrightCol) {
+        if (scrollLeft + containerWidth < scrollTableWidth) {
+          fixedrightCol.classList.add('shadow');
+        } else {
+          fixedrightCol.classList.remove('shadow');
+        }
+      }
+    }
+  };
+
+  // 同步单元格宽度和高度
   getFixedColAttrs() {
     const { columns } = this.props;
 
@@ -44,12 +103,22 @@ class Table extends Component {
 
     const firstColumn = columns[0];
     const lastColumn = columns[columns.length - 1];
-    const { thead, trow } = this;
+    const {
+      thead, trow, leftCell, rightCell,
+    } = this;
 
     if (firstColumn.fixed || lastColumn.fixed) {
       const fixedColThHeight = domUtil.getStyleComputedProperty(
         thead,
         'height'
+      );
+      const fixedleftColWidth = domUtil.getStyleComputedProperty(
+        leftCell,
+        'width'
+      );
+      const fixedrightColWidth = domUtil.getStyleComputedProperty(
+        rightCell,
+        'width'
       );
       let fixedColTdHeight = 40;
       if (trow) {
@@ -59,8 +128,10 @@ class Table extends Component {
       this.setState({
         fixedColAttrs: {
           fixedColThHeight,
-          fixedColTdHeight
-        }
+          fixedColTdHeight,
+          fixedleftColWidth,
+          fixedrightColWidth,
+        },
       });
     }
   }
@@ -73,10 +144,10 @@ class Table extends Component {
     dataColumns = []
   ) {
     rows[currentRow] = rows[currentRow] || [];
-    let group = [];
+    const group = [];
 
     function setRowSpan(column) {
-      let rowSpan = rows.length - currentRow;
+      const rowSpan = rows.length - currentRow;
       if (
         column &&
         !column.children &&
@@ -87,7 +158,7 @@ class Table extends Component {
       }
     }
     columns.forEach((column, index) => {
-      let newColumn = { ...column };
+      const newColumn = { ...column };
       rows[currentRow].push(newColumn);
       parentColumn.colSpan = parentColumn.colSpan || 0;
       if (newColumn.children && newColumn.children.length > 0) {
@@ -123,64 +194,6 @@ class Table extends Component {
     }
   }
 
-  onSort(column) {
-    const { dataSource } = this.props;
-    const sort = !this.state.sort[column.dataIndex];
-
-    sort ? dataSource.sort(column.sorter) : dataSource.reverse(column.sorter);
-
-    this.setState({
-      sort: {
-        [`${column.dataIndex}`]: sort
-      }
-    });
-  }
-
-  onEnterTableRow(index) {
-    const { fixedleftTbody, fixedrightTbody, scrollTbody } = this;
-
-    [fixedleftTbody, fixedrightTbody, scrollTbody].forEach(tbody => {
-      if (tbody) {
-        this.toggleHoverStatus(tbody.querySelectorAll('tr'), index);
-      }
-    });
-  }
-
-  onLeaveTableRow(index) {
-    this.onEnterTableRow(-1);
-  }
-
-  onScrollTable = e => {
-    const { target } = e;
-    const { fixedleftCol, fixedrightCol, scrollTable } = this;
-    const containerWidth = parseInt(
-      domUtil.getStyleComputedProperty(target, 'width'),
-      10
-    );
-    const scrollTableWidth = parseInt(
-      domUtil.getStyleComputedProperty(scrollTable, 'width'),
-      10
-    );
-    const { scrollLeft } = target;
-
-    if (containerWidth < scrollTableWidth) {
-      if (fixedleftCol) {
-        if (scrollLeft > 0) {
-          fixedleftCol.classList.add('shadow');
-        } else {
-          fixedleftCol.classList.remove('shadow');
-        }
-      }
-      if (fixedrightCol) {
-        if (scrollLeft + containerWidth < scrollTableWidth) {
-          fixedrightCol.classList.add('shadow');
-        } else {
-          fixedrightCol.classList.remove('shadow');
-        }
-      }
-    }
-  };
-
   renderTable() {
     const {
       columns,
@@ -188,12 +201,12 @@ class Table extends Component {
       rowClick,
       rowSelection,
       style,
-      width
+      width,
     } = this.props;
     const { headRows, dataColumns } = this.groupColumns(columns);
     const cls = classnames({
       'ui-table-scroll': true,
-      'ui-table-multi-headrow': headRows.length > 1
+      'ui-table-multi-headrow': headRows.length > 1,
     });
 
     return (
@@ -201,12 +214,12 @@ class Table extends Component {
         className={cls}
         width={width}
         style={style}
-        ref={scrollTable => {
+        ref={(scrollTable) => {
           this.scrollTable = scrollTable;
         }}
       >
         <thead
-          ref={thead => {
+          ref={(thead) => {
             this.thead = thead;
           }}
         >
@@ -223,14 +236,13 @@ class Table extends Component {
                     )
                   : null}
                 {row.map((column, columnIndex) =>
-                  this.renderColumn(column, columnIndex)
-                )}
+                  this.renderColumn(column, columnIndex, index, row.length))}
               </tr>
             );
           })}
         </thead>
         <tbody
-          ref={scrollTbody => {
+          ref={(scrollTbody) => {
             this.scrollTbody = scrollTbody;
           }}
         >
@@ -246,9 +258,9 @@ class Table extends Component {
             const refAttr =
               rowIndex === 0
                 ? {
-                    ref: trow => {
+                    ref: (trow) => {
                       this.trow = trow;
-                    }
+                    },
                   }
                 : {};
 
@@ -275,14 +287,14 @@ class Table extends Component {
   renderFixedLeftCol() {
     const { dataSource, rowSelection } = this.props;
     const {
-      fixedColAttrs: { fixedColThHeight, fixedColTdHeight }
+      fixedColAttrs: { fixedColThHeight, fixedColTdHeight },
     } = this.state;
     const cls = 'ui-table-fixed-left';
 
     if (rowSelection && rowSelection.fixed) {
       return (
         <table
-          ref={fixedCol => {
+          ref={(fixedCol) => {
             this.fixedleftCol = fixedCol;
           }}
           className={cls}
@@ -300,7 +312,7 @@ class Table extends Component {
             </tr>
           </thead>
           <tbody
-            ref={fixedTbody => {
+            ref={(fixedTbody) => {
               this.fixedleftTbody = fixedTbody;
             }}
           >
@@ -335,29 +347,32 @@ class Table extends Component {
   renderFixedTable(direction) {
     const { columns, dataSource } = this.props;
     const {
-      fixedColAttrs: { fixedColThHeight, fixedColTdHeight }
+      fixedColAttrs: {
+        fixedColThHeight, fixedColTdHeight, fixedleftColWidth, fixedrightColWidth,
+      },
     } = this.state;
     const column = direction === 'left' ? columns[0] : columns[columns.length - 1];
+    const columnWidth = direction === 'left' ? fixedleftColWidth : fixedrightColWidth;
     const {
-      fixed, title, render, dataIndex
+      fixed, title, render, dataIndex,
     } = column;
     const cls = `ui-table-fixed-${direction}`;
 
     if (fixed && fixed === direction) {
       return (
         <table
-          ref={fixedCol => {
+          ref={(fixedCol) => {
             this[`fixed${direction}Col`] = fixedCol;
           }}
           className={cls}
         >
           <thead>
             <tr>
-              <th style={{ height: fixedColThHeight }}>{title}</th>
+              <th style={{ width: columnWidth, height: fixedColThHeight }}>{title}</th>
             </tr>
           </thead>
           <tbody
-            ref={fixedTbody => {
+            ref={(fixedTbody) => {
               this[`fixed${direction}Tbody`] = fixedTbody;
             }}
           >
@@ -396,7 +411,7 @@ class Table extends Component {
       >
         <Checkbox
           checked={this.state.selectedRows.length === dataSource.length}
-          onChange={e => {
+          onChange={(e) => {
             const selected = e.target.checked;
             const selectedRows = selected ? dataSource.map(data => data) : [];
 
@@ -416,9 +431,9 @@ class Table extends Component {
         <Checkbox
           value={row}
           checked={this.state.selectedRows.indexOf(row) > -1}
-          onChange={e => {
+          onChange={(e) => {
             const selected = e.target.checked;
-            let { selectedRows } = this.state;
+            const { selectedRows } = this.state;
 
             if (selectedRows.indexOf(row) === -1) {
               selectedRows.push(row);
@@ -435,16 +450,28 @@ class Table extends Component {
   }
 
   // 表头渲染
-  renderColumn(column, index) {
+  renderColumn(column, index, rowIndex, length) {
     const render =
       'columnRender' in column
         ? column.columnRender(column, index)
         : column.title;
 
     const {
-      dataIndex, width, rowSpan, colSpan, style = {}
+      dataIndex, width, rowSpan, colSpan, style = {},
     } = column;
 
+    let refAttr = {};
+    if (rowIndex === 0) {
+      if (index === 0) {
+        refAttr = {
+          ref: (leftCell) => { this.leftCell = leftCell; },
+        };
+      } else if (index === length - 1) {
+        refAttr = {
+          ref: (rightCell) => { this.rightCell = rightCell; },
+        };
+      }
+    }
     return (
       <th
         key={dataIndex + index}
@@ -452,6 +479,7 @@ class Table extends Component {
         rowSpan={rowSpan}
         colSpan={colSpan}
         style={style}
+        {...refAttr}
       >
         {render}
         {this.renderSorter(column)}
@@ -464,11 +492,11 @@ class Table extends Component {
     const sort = this.state.sort[column.dataIndex];
     const sortUpCls = classnames({
       'ui-table-sorter-up': true,
-      'ui-table-sorter-active': !!sort
+      'ui-table-sorter-active': !!sort,
     });
     const sortDownCls = classnames({
       'ui-table-sorter-down': true,
-      'ui-table-sorter-active': sort !== undefined && !sort
+      'ui-table-sorter-active': sort !== undefined && !sort,
     });
 
     return column.sorter ? (
@@ -536,7 +564,7 @@ class Table extends Component {
       isHover,
       isLoading,
       size,
-      className
+      className,
     } = props;
 
     const cls = classnames({
@@ -546,7 +574,7 @@ class Table extends Component {
       'ui-table-radius': 'radius' in props || isRadius,
       'ui-table-hover': 'hover' in props || isHover,
       [`size-${size}`]: !!size,
-      [className]: !!className
+      [className]: !!className,
     });
 
     const content = isLoading ? (
@@ -574,7 +602,7 @@ Table.propTypes = {
   isBordered: PropTypes.bool,
   isStriped: PropTypes.bool,
   isRadius: PropTypes.bool,
-  isHover: PropTypes.bool
+  isHover: PropTypes.bool,
 };
 
 Table.defaultProps = {
@@ -582,7 +610,7 @@ Table.defaultProps = {
   isBordered: false,
   isStriped: false,
   isRadius: false,
-  isHover: false
+  isHover: false,
 };
 
 export default Table;

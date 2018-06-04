@@ -7,7 +7,7 @@ class Option extends Component {
   render() {
     const { props } = this;
     const {
-      children, checked, disabled, isDisabled
+      children, checked, disabled, isDisabled, onDoubleClick,
     } = props;
 
     const disableProps = {
@@ -21,6 +21,7 @@ class Option extends Component {
         checked={checked}
         {...disableProps}
         onClick={e => props.onChange(e)}
+        onDoubleClick={onDoubleClick}
       >
         {children}
       </Menu.Item>
@@ -31,13 +32,13 @@ class Option extends Component {
 Option.propTypes = {
   defaultChecked: PropTypes.bool,
   isDisabled: PropTypes.bool,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
 };
 
 Option.defaultProps = {
   defaultChecked: false,
   isDisabled: false,
-  onChange: () => {}
+  onChange: () => {},
 };
 
 export default Option;

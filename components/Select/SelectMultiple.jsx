@@ -11,65 +11,21 @@ class SelectMultiple extends Component {
       value:
         props.value ||
         props.defaultValue ||
-        this.getCheckedValue(props.children)
+        this.getCheckedValue(props.children),
     };
   }
 
   componentWillReceiveProps(nextProps) {
     if ('value' in nextProps || this.getCheckedValue(nextProps.children)) {
       this.setState({
-        value: nextProps.value || this.getCheckedValue(nextProps.children)
+        value: nextProps.value || this.getCheckedValue(nextProps.children),
       });
     }
   }
 
-  render() {
-    const { props } = this;
-    const {
-      isRadius, isDisabled, size, style
-    } = props;
-    const disabled = 'disabled' in props || isDisabled;
-    const radius = 'radius' in props || isRadius;
-
-    // eslint-disable-next-line
-    let children = React.Children.map(props.children, (option, index) => {
-      return (
-        <Option
-          {...option.props}
-          onChange={e => this.onOptionChange(e, option.props, index)}
-          checked={!!(this.state.value.indexOf(option.props.value) > -1)}
-        />
-      );
-    });
-
-    const cls = classnames({
-      'ui-select': true,
-      'ui-select-open': this.state.dropdown,
-      disabled,
-      radius,
-      [`size-${size}`]: !!size
-    });
-
-    return (
-      <span className={cls} style={style}>
-        <span
-          className="ui-select-selection"
-          style={{ height: '100%' }}
-          role="combobox"
-          aria-autocomplete="list"
-          aria-haspopup="true"
-          aria-expanded="false"
-          onClick={e => !disabled && this.onSelectClick(e)}
-        >
-          <Menu size={size}>{children}</Menu>
-        </span>
-      </span>
-    );
-  }
-
   // eslint-disable-next-line
   getCheckedValue(children) {
-    let checkedValue = [];
+    const checkedValue = [];
     React.Children.forEach(children, (option) => {
       if (option.props && option.props.checked) {
         checkedValue.push(option.props.value);
@@ -88,9 +44,9 @@ class SelectMultiple extends Component {
       return;
     }
 
-    let { value } = this.state;
-    let index = value.indexOf(props.value);
-    let isSelected = index > -1;
+    const { value } = this.state;
+    const index = value.indexOf(props.value);
+    const isSelected = index > -1;
 
     if (isSelected) {
       value.splice(index, 1);
@@ -102,23 +58,70 @@ class SelectMultiple extends Component {
       index: rowIndex,
       value: props.value,
       text: props.children,
-      selected: !isSelected
+      selected: !isSelected,
     };
 
     this.setState({ value }, this.props.onChange(value, row));
+  }
+
+  render() {
+    const { props } = this;
+    const {
+      isRadius, isDisabled, size, style, onDoubleClick,
+    } = props;
+    const disabled = 'disabled' in props || isDisabled;
+    const radius = 'radius' in props || isRadius;
+
+    // eslint-disable-next-line
+    let children = React.Children.map(props.children, (option, index) => {
+      return (
+        <Option
+          {...option.props}
+          onDoubleClick={onDoubleClick}
+          onChange={e => this.onOptionChange(e, option.props, index)}
+          checked={!!(this.state.value.indexOf(option.props.value) > -1)}
+        />
+      );
+    });
+
+    const cls = classnames({
+      'ui-select': true,
+      'ui-select-open': this.state.dropdown,
+      disabled,
+      radius,
+      [`size-${size}`]: !!size,
+    });
+
+    return (
+      <span className={cls} style={style}>
+        <span
+          className="ui-select-selection"
+          style={{ height: '100%' }}
+          role="combobox"
+          aria-autocomplete="list"
+          aria-haspopup="true"
+          aria-expanded="false"
+          onClick={e => !disabled && this.onSelectClick(e)}
+        >
+          <Menu size={size}>{children}</Menu>
+        </span>
+      </span>
+    );
   }
 }
 
 SelectMultiple.propTypes = {
   isRadius: PropTypes.bool,
   isDisabled: PropTypes.bool,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  onDoubleClick: PropTypes.func,
 };
 
 SelectMultiple.defaultProps = {
   isRadius: false,
   isDisabled: false,
-  onChange: () => {}
+  onChange: () => {},
+  onDoubleClick: () => {},
 };
 
 export default SelectMultiple;
