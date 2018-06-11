@@ -33,9 +33,10 @@ class Tag extends Component {
       [className]: !!className,
     });
 
-    const closeIcon = onClose ? (
+    const closeIcon = typeof onClose === 'function' ? (
       <Icon type="wrong" onClick={!disabled && onClose} />
     ) : null;
+
     return (
       <div className={cls} style={style}>
         {children}
@@ -54,7 +55,7 @@ Tag.propTypes = {
 Tag.defaultProps = {
   theme: 'default',
   size: null,
-  onClose: () => {},
+  onClose: null,
 };
 
 export default Tag;
