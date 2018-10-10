@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import classnames from 'classnames';
-import Events from '../utils/events';
 import Format from '../utils/format';
 import Dropdown from '../dropdown';
 import Calendar from '../calendar';
 import Icon from '../icon';
+import Input from '../input';
 import PropsType from './PropsType';
+import LocaleReceiver from '../locale/LocaleReceiver';
 
 class DatePicker extends Component<PropsType, any> {
   static defaultProps = {
@@ -13,7 +14,10 @@ class DatePicker extends Component<PropsType, any> {
     format: 'yyyy-MM-dd',
     min: '',
     max: '',
-    onChange: () => { },
+    showTime: false,
+    allowInput: false,
+    onChange: () => {},
+    onInputInvalidDate: () => {},
   };
 
   private unmounted;
@@ -23,6 +27,7 @@ class DatePicker extends Component<PropsType, any> {
     this.state = {
       value: Format.date(props.value || props.defaultValue, props.format),
       dropdown: false,
+      flag: true,
     };
   }
 
@@ -40,37 +45,53 @@ class DatePicker extends Component<PropsType, any> {
 
   componentWillUnmount() {
     this.unmounted = false;
-    this.unbindOuterHandlers();
   }
 
-  onSelectClick(e) {
-    e.preventDefault();
-    const disabled = 'disabled' in this.props || this.props.isDisabled;
-    if (!disabled) {
-      this.setDropdown(!this.state.dropdown);
+  onDateChange(value, dropdown, isTimeChange = false) {
+    if (isTimeChange) { // hack方法 临时解决datetimePicker点击空白区域需要关闭的问题
+      this.setState({
+        flag: false,
+      }, () => {
+        setTimeout(() => {
+          this.setState({
+            flag: true,
+          });
+        });
+      });
     }
-  }
 
-  onDateChange(value) {
     this.setState(
       {
         value,
+        dropdown,
       },
       () => {
-        this.setDropdown(false, () => this.props.onChange(value));
+        this.setDropdown(dropdown, () => this.props.onChange(value));
       },
     );
+  }
+
+  onInputDateValue = (e) => {
+    let { target: { value } } = e;
+    const { format } = this.props;
+
+    value = Format.transform(value, format);
+
+    if (Format.validate(value, format)) {
+      if (Format.inrange(value, format)) {
+        this.onDateChange(value, false);
+      } else {
+        this.props.onInputInvalidDate(value);
+      }
+    }
+    this.setState({
+      value,
+    });
   }
 
   setDropdown(isOpen, callback?) {
     if (!this.unmounted) {
       return;
-    }
-
-    if (isOpen) {
-      this.bindOuterHandlers();
-    } else {
-      this.unbindOuterHandlers();
     }
 
     this.setState(
@@ -85,38 +106,40 @@ class DatePicker extends Component<PropsType, any> {
     );
   }
 
-  handleKeyup = (e) => {
-    if (e.keyCode === 27) {
-      this.setDropdown(false);
+  renderOverlay () {
+    const { defaultValue, min, max, showTime, format } = this.props;
+    const { value } = this.state;
+
+    const values = {
+      value,
+      defaultValue,
+    };
+
+    if (!Format.validate(value, format) || !Format.inrange(value, format)) {
+      values.value = '';
     }
-  }
 
-  bindOuterHandlers() {
-    Events.on(document, 'keyup', this.handleKeyup);
-  }
-
-  unbindOuterHandlers() {
-    Events.off(document, 'keyup', this.handleKeyup);
+    return (
+      <Calendar
+        {...values}
+        format={format}
+        hasFooter
+        min={min}
+        max={max}
+        showTime={showTime}
+        onChange={(value, dropdown, isTimeChange) => this.onDateChange(value, dropdown, isTimeChange)}
+      />
+    );
   }
 
   render() {
     const { props } = this;
-    const {
-      defaultValue,
-      placeholder,
-      isDisabled,
-      isRadius,
-      size,
-      format,
-      min,
-      max,
-      style,
-    } = props;
+    const { placeholder, isDisabled, isRadius, size, style, locale, showTime, allowInput } = props;
     const { value, dropdown } = this.state;
     const disabled = 'disabled' in props || isDisabled;
     const radius = 'radius' in props || isRadius;
 
-    let valueText = placeholder;
+    let valueText = placeholder || locale!.placeholder;
     let hasValue = false;
 
     if (value) {
@@ -137,7 +160,7 @@ class DatePicker extends Component<PropsType, any> {
 
     return (
       <Dropdown
-        onVisibleChange={(visible) => {
+        onVisibleChange={visible => {
           if (disabled) {
             return;
           }
@@ -145,18 +168,10 @@ class DatePicker extends Component<PropsType, any> {
             dropdown: visible,
           });
         }}
-        overlay={<Calendar
-          defaultValue={defaultValue}
-          value={value}
-          format={format}
-          hasFooter
-          min={min}
-          max={max}
-          // tslint:disable-next-line:no-shadowed-variable
-          onChange={value => this.onDateChange(value)}
-        />}
+        overlay={this.renderOverlay()}
         isRadius={radius}
         visible={dropdown}
+        hideOnClick={this.state.flag}
       >
         <span className={cls} style={style}>
           <span
@@ -165,10 +180,19 @@ class DatePicker extends Component<PropsType, any> {
             aria-autocomplete="list"
             aria-haspopup="true"
             aria-expanded="false"
-            onClick={e => this.onSelectClick(e)}
           >
-            <span className={textCls}>{valueText}</span>
-            <Icon className="ui-select-icon" type="date" />
+            <span className={textCls}>
+              {
+                allowInput && !showTime ?
+                <Input
+                  onChange={this.onInputDateValue}
+                  value={value}
+                  placeholder={valueText}
+                /> :
+                valueText
+              }
+            </span>
+            <Icon className="ui-select-icon" type="date"/>
           </span>
         </span>
       </Dropdown>
@@ -176,4 +200,4 @@ class DatePicker extends Component<PropsType, any> {
   }
 }
 
-export default DatePicker;
+export default LocaleReceiver(DatePicker, 'DatePicker');

@@ -59,36 +59,39 @@ const placementMap = {
 const defaultProps = {
   visible: false,
   isRadius: false,
+  hideOnClick: true,
   prefixCls: 'ui-dropdown',
   placement: 'bottomLeft',
   trigger: 'click',
   disabled: false,
-  zIndex: 9999,
+  zIndex: 2018,
 };
+
+const mountedInstance = new Set();
 
 export default class Dropdown extends React.Component<propsType, StateType> {
   static defaultProps = defaultProps;
   // 隐藏全部的Dropdown
   static hide(): void {
-    Dropdown.mountedInstance.forEach((instance) => {
+    mountedInstance.forEach((instance) => {
       instance.props.onVisibleChange(false);
     });
   }
   // 显示全部的Dropdown 除了disable
   static show(): void {
-    Dropdown.mountedInstance.forEach((instance) => {
+    mountedInstance.forEach((instance) => {
       instance.props.onVisibleChange(true);
     });
   }
 
   // 重新计算Dropdown定位
   static reposition() {
-    Dropdown.mountedInstance.forEach((instance) => {
+    mountedInstance.forEach((instance) => {
       instance.reposition();
     });
   }
   // 用于存储已生成的全部实例的Set
-  private static mountedInstance: Set<Dropdown> = new Set();
+  // private static mountedInstance: Set<Dropdown> = new Set();
   // 根据定位点计算定位信息
   private static calcPosition(
     placement: string,
@@ -156,6 +159,7 @@ export default class Dropdown extends React.Component<propsType, StateType> {
   private scrollParent: HTMLElement;
   private isHoverOnDropContent: boolean = false;
   private hiddenTimer: number | undefined;
+  private triggerBoxOffsetHeight: number;
 
   constructor(props) {
     super(props);
@@ -201,7 +205,7 @@ export default class Dropdown extends React.Component<propsType, StateType> {
     } else if (type === 'mouseleave') {
       // 缓冲一点一时间给间隙
       this.hiddenTimer = setTimeout(() => {
-        // 若当前鼠标在弹出层上 不消失
+        // 若当前鼠标在弹出层上 则不消失
         if (this.isHoverOnDropContent === false) {
           this.props.onVisibleChange(false);
         }
@@ -251,19 +255,31 @@ export default class Dropdown extends React.Component<propsType, StateType> {
     events.on(this.scrollParent, 'scroll', this.onParentScroll);
 
     // 存储当前实例，方便静态方法统一处理
-    Dropdown.mountedInstance.add(this);
+    mountedInstance.add(this);
+    this.triggerBoxOffsetHeight = this.triggerBox.offsetHeight;
+  }
+
+  componentDidUpdate() {
+    const height = this.triggerBox.offsetHeight;
+    if (height !== this.triggerBoxOffsetHeight) {
+      this.reposition();
+      this.triggerBoxOffsetHeight = height;
+    }
   }
 
   // 点击外部的时候
   onDocumentClick = (e): void => {
-    if (this.props.disabled === true) {
+    if (this.props.disabled === true || this.state.visible === false) {
       return;
     }
     const target: Node = e.target;
     if (this.div.contains(target) || this.triggerBox.contains(target)) {
       return;
     } else {
-      this.props.onVisibleChange(false);
+      // this.props.onVisibleChange(false);
+      if (this.props.hideOnClick) {
+        this.props.onVisibleChange(false);
+      }
     }
   }
 
@@ -332,7 +348,7 @@ export default class Dropdown extends React.Component<propsType, StateType> {
     events.off(document, 'click', this.onDocumentClick);
     events.off(window, 'click', this.onWindowResize);
     events.off(this.scrollParent, 'scroll', this.onParentScroll);
-    Dropdown.mountedInstance.delete(this);
+    mountedInstance.delete(this);
     setTimeout(() => {
       this.popContainer.removeChild(this.div);
     });
@@ -378,9 +394,10 @@ export default class Dropdown extends React.Component<propsType, StateType> {
       zIndex,
       notRenderInDisabledMode,
       visible,
+      hideOnClick,
       onVisibleChange,
       getPopupContainer,
-      // tslint:disable-next-line:trailing-comma
+      triggerBoxStyle,
       ...others
     } = this.props;
 
@@ -408,7 +425,7 @@ export default class Dropdown extends React.Component<propsType, StateType> {
     return <React.Fragment>
       <div
         className={`${prefixCls}-trigger-box`}
-        style={{ display: 'inline-block' }}
+        style={triggerBoxStyle}
         ref={(e) => { this.triggerBox = e as HTMLDivElement; }}
         {...this.triggerEvent}
       >

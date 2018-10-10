@@ -16,6 +16,12 @@ class Input extends Component<PropsType, any> {
     size: null,
   };
 
+  inputElem: HTMLInputElement | HTMLTextAreaElement;
+
+  inputElemRef = (elem) => {
+    this.inputElem = elem;
+  }
+
   render() {
     const { props } = this;
     const {
@@ -31,7 +37,6 @@ class Input extends Component<PropsType, any> {
       placeholder,
       maxLength,
       style,
-      // tslint:disable-next-line:trailing-comma
       ...otherProps
     } = props;
     const disabled = 'disabled' in props || isDisabled;
@@ -56,6 +61,7 @@ class Input extends Component<PropsType, any> {
     const input =
       type === 'textarea' ? (
         <textarea
+          ref={this.inputElemRef}
           className={cls}
           style={style}
           rows={rows}
@@ -68,17 +74,18 @@ class Input extends Component<PropsType, any> {
           {defaultValue}
         </textarea>
       ) : (
-        <input
-          type={type}
-          defaultValue={defaultValue}
-          className={cls}
-          style={style}
-          placeholder={placeholder}
-          maxLength={maxLength}
-          disabled={disabled}
-          {...otherProps}
-        />
-      );
+          <input
+            ref={this.inputElemRef}
+            type={type}
+            defaultValue={defaultValue}
+            className={cls}
+            style={style}
+            placeholder={placeholder}
+            maxLength={maxLength}
+            disabled={disabled}
+            {...otherProps}
+          />
+        );
 
     return <span>{input}</span>;
   }

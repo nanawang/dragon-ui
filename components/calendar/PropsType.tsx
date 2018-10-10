@@ -7,8 +7,12 @@ export type dateType = {
 export interface HeaderProps {
   prefixCls?: string;
   panel?: string;
-  current: string;
-  onChange: (cur: string) => void;
+  locale: { [propName: string]: any };
+  localeCode: string;
+  current: string | Date;
+  isShowPrev?: boolean;
+  isShowNext?: boolean;
+  onChange: (cur: string) => void | undefined;
   onChangePanel: (panel: string) => void;
 }
 
@@ -17,7 +21,7 @@ export interface YearTableProps {
   value?: string;
   defaultValue?: string;
   visible?: boolean;
-  current?: string;
+  current?: string | Date;
   onYearClick: (value: any) => void;
 }
 
@@ -26,19 +30,23 @@ export interface MonthTableProps {
   value?: string;
   defaultValue?: string;
   visible?: boolean;
-  current?: string;
+  locale: { [propName: string]: any };
+  current?: string | Date;
+  disabledMonth?: (value: any) => void;
   onMonthClick: (value: any) => void;
 }
 
 export interface DateTableProps {
   prefixCls?: string;
   value?: string;
+  selectedValue?: string[] | Date[];
   defaultValue?: string;
   visible?: boolean;
-  current?: string;
+  current?: string | Date;
   min?: string;
   max?: string;
-  onDateClick: (value: any) => void;
+  locale: { [propName: string]: any };
+  onDateClick: (value: any, isNow?: boolean) => void;
 }
 
 export default interface PropsType {
@@ -46,10 +54,20 @@ export default interface PropsType {
   format?: string;
   min?: string;
   max?: string;
-  value?: string;
+  current?: string | Date;
+  value?: string | Date;
+  selectedValue?: string[] | Date[];
   defaultValue?: string;
   className?: string;
   style?: object;
   hasFooter?: boolean;
-  onChange?: (value: string) => void;
+  locale: { [propName: string]: any };
+  isLeftCalendar?: boolean; // 在 rangeCalendar 中表示是开始日历，
+  isRightCalendar?: boolean; // 在 rangeCalendar 中表示是结束日历，
+  showTime?: boolean;
+  onChange?: (value: string, dropdown: boolean, isTimeChange?: boolean) => void;
+  isShowPrev?: boolean;
+  isShowNext?: boolean;
+  disabledMonth?: (value: any) => void;
+  onPanelChange?: (value: any) => void;
 }

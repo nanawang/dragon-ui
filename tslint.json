@@ -92,7 +92,8 @@
       true,
       {
         "singleline": "never",
-        "multiline": "always"
+        "multiline": "always",
+        "esSpecCompliant": true
       }
     ],
     "triple-equals": [
@@ -140,6 +141,7 @@
       true,
       "never"
     ],
-    "jsx-wrap-multiline": false
+    "jsx-wrap-multiline": false,
+    "variable-name": false
   }
 }

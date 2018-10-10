@@ -1,9 +1,20 @@
 const path = require('path');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const browsers = require('../config/browsers');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const browserlist = require('../config/browserlist');
+const babelConfig = require('../config/babelConfig');
+
+const isDev = process.env.NODE_ENV === 'development';
+
+babelConfig.plugins.push([
+  'import',
+  {
+    libraryName: 'dragon-ui',
+    libraryDirectory: 'components',
+    style: true,
+  },
+]);
 
 module.exports = {
-
   output: {
     path: path.resolve(__dirname, '../../assets'),
     filename: 'js/[name].js',
@@ -19,30 +30,7 @@ module.exports = {
         use: [
           {
             loader: 'babel-loader',
-            options: {
-              presets: [
-                [
-                  'env',
-                  {
-                    modules: false,
-                    targets: {
-                      browsers,
-                    },
-                  },
-                ],
-                'react',
-                'stage-0',
-              ],
-              plugins: [
-                'transform-runtime',
-                ['import', {
-                  libraryName: 'dragon-ui',
-                  libraryDirectory: 'components',
-                  style: true,
-                  camel2DashComponentName: false,
-                }],
-              ],
-            },
+            options: babelConfig,
           },
         ],
       },
@@ -52,24 +40,7 @@ module.exports = {
         use: [
           {
             loader: 'babel-loader',
-            options: {
-              presets: [
-                [
-                  'env',
-                  {
-                    modules: false,
-                    targets: {
-                      browsers,
-                    },
-                  },
-                ],
-                'react',
-                'stage-0',
-              ],
-              plugins: [
-                'transform-runtime',
-              ],
-            },
+            options: babelConfig,
           },
           {
             loader: 'awesome-typescript-loader',
@@ -78,30 +49,29 @@ module.exports = {
       },
       {
         test: /\.(css|scss)$/,
-        use: ExtractTextPlugin.extract({
-          use: [
-            {
-              loader: 'css-loader?importLoaders=1',
+        use: [
+          isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+          {
+            loader: 'css-loader?importLoaders=1',
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: [
+                require('autoprefixer')({
+                  browsers: browserlist,
+                }),
+              ],
             },
-            {
-              loader: 'postcss-loader',
-              options: {
-                plugins: [
-                  require('autoprefixer')({
-                    browsers,
-                  }),
-                ],
-              },
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true,
+              outputStyle: 'compact',
             },
-            {
-              loader: 'sass-loader',
-              options: {
-                sourceMap: true,
-                outputStyle: 'compact',
-              },
-            },
-          ],
-        }),
+          },
+        ],
       },
       {
         test: /\.(png|jpg|jpeg|gif|svg)$/,
@@ -117,7 +87,11 @@ module.exports = {
         exclude: /node_modules/,
         use: [
           {
-            loader: 'file-loader?name=fonts/[name].[hash:8].[ext]',
+            loader: 'file-loader',
+            options: {
+              name: './fonts/[name].[hash:8].[ext]',
+              publicPath: '../',
+            },
           },
         ],
       },

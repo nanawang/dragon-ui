@@ -4,8 +4,10 @@ import Select from '../select';
 import Input from '../input';
 import Icon from '../icon';
 import PropsType from './PropsType';
+import format from '../locale/format';
+import LocaleReceiver from '../locale/LocaleReceiver';
 
-const noop = () => {};
+const noop = () => { };
 class Pagination extends Component<PropsType, any> {
   static defaultProps = {
     prefixCls: 'ui-pagination',
@@ -95,11 +97,11 @@ class Pagination extends Component<PropsType, any> {
   }
 
   firstPager = () => {
-    const { prefixCls } = this.props;
+    const { prefixCls, locale } = this.props;
     return (
       <li
         key={1}
-        title="第-页"
+        title={locale!.first_page}
         className={`${prefixCls}-item`}
         onClick={() => this._onPagerClick(1)}
       >
@@ -109,11 +111,11 @@ class Pagination extends Component<PropsType, any> {
   }
 
   lastPager = (pageCount) => {
-    const { prefixCls } = this.props;
+    const { prefixCls, locale } = this.props;
     return (
       <li
         key={pageCount}
-        title="最后一页"
+        title={locale!.last_page}
         className={`${prefixCls}-item`}
         onClick={() => this._onPagerClick(pageCount)}
       >
@@ -123,11 +125,11 @@ class Pagination extends Component<PropsType, any> {
   }
 
   prevPager = (current) => {
-    const { prefixCls } = this.props;
+    const { prefixCls, locale } = this.props;
     return (
       <li
         key="prev"
-        title="上一页"
+        title={locale!.prev_page}
         // tslint:disable-next-line:jsx-no-multiline-js
         className={classnames({
           [`${prefixCls}-item`]: true,
@@ -142,11 +144,11 @@ class Pagination extends Component<PropsType, any> {
   }
 
   nextPager = (current, pageCount) => {
-    const { prefixCls } = this.props;
+    const { prefixCls, locale } = this.props;
     return (
       <li
         key="next"
-        title="下一页"
+        title={locale!.next_page}
         // tslint:disable-next-line:jsx-no-multiline-js
         className={classnames({
           [`${prefixCls}-item`]: true,
@@ -161,11 +163,11 @@ class Pagination extends Component<PropsType, any> {
   }
 
   jumpPrev = (current) => {
-    const { prefixCls } = this.props;
+    const { prefixCls, locale } = this.props;
     return (
       <li
         key="jump-prev"
-        title="向前 5 页"
+        title={locale!.prev_5_page}
         className={`${prefixCls}-item ${prefixCls}-item-jump-prev`}
         onClick={() => this._onPagerClick(current - 5)}
       />
@@ -173,11 +175,11 @@ class Pagination extends Component<PropsType, any> {
   }
 
   jumpNext = (current) => {
-    const { prefixCls } = this.props;
+    const { prefixCls, locale } = this.props;
     return (
       <li
         key="jump-next"
-        title="向后 5 页"
+        title={locale!.next_5_page}
         className={`${prefixCls}-item ${prefixCls}-item-jump-next`}
         onClick={() => this._onPagerClick(current + 5)}
       />
@@ -236,23 +238,28 @@ class Pagination extends Component<PropsType, any> {
   }
 
   renderTotal = () => {
-    const { total, pageSize, prefixCls } = this.props;
+    const { total, pageSize, prefixCls, locale } = this.props;
     const { value } = this.state;
     return (
       <div className={`${prefixCls}-total`}>
-        共有 {total} 条记录 第 {value} / {Math.ceil(total / pageSize)} 页
+        {format(locale!.total, {
+          total,
+        })}
+        {format(locale!.current, {
+          current: `${value} / ${Math.ceil(total / pageSize)}`,
+        })}
       </div>
     );
   }
 
   renderPageSizeSelector = () => {
-    const { radius, prefixCls, pageSize, onPageSizeChange, onChange } = this.props;
+    const { radius, prefixCls, pageSize, onPageSizeChange, onChange, locale } = this.props;
     return (
       <div className={`${prefixCls}-size`}>
         <Select
           isRadius={radius}
-          size="sm"
           defaultValue={10}
+          size="sm"
           // tslint:disable-next-line:jsx-no-multiline-js
           onChange={({ value }) => {
             if (value === pageSize) {
@@ -268,43 +275,46 @@ class Pagination extends Component<PropsType, any> {
             });
           }}
         >
-          <Select.Option value={10}>每页 10 条</Select.Option>
-          <Select.Option value={20}>每页 20 条</Select.Option>
-          <Select.Option value={30}>每页 30 条</Select.Option>
-          <Select.Option value={40}>每页 40 条</Select.Option>
-          <Select.Option value={50}>每页 50 条</Select.Option>
+          {
+            [10, 20, 30, 40, 50].map((value) => {
+              return (
+                <Select.Option value={value} key={value}>{format(locale!.pagesize, { value })}</Select.Option>
+              );
+            })
+          }
         </Select>
       </div>
     );
   }
 
   renderJumper = () => {
-    const { radius, total, pageSize, prefixCls } = this.props;
+    const { radius, total, pageSize, prefixCls, locale } = this.props;
     return (
       <div className={`${prefixCls}-jumper`}>
-        跳至
+        {locale!.goto}
         <Input
           isRadius={radius}
-          style={{ width: 50, marginLeft: 5, marginRight: 5 }}
+          type="text"
+          style={{ width: 50, textAlign: 'center', marginLeft: 5, marginRight: 5 }}
           size="sm"
           defaultValue=""
           // tslint:disable-next-line:jsx-no-multiline-js
-          onKeyDown={(e) => {
-            let { value } = e.target;
+          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+            let { value } = e.target as HTMLInputElement;
             if (e.keyCode === 13) {
-              value = parseInt(value, 10);
+              let sValue = parseInt(value, 10);
               // eslint-disable-next-line
-              if (!value || isNaN(value)) { return; }
+              if (!sValue || isNaN(sValue)) { return; }
 
-              if (value < 1) { value = 1; }
+              if (sValue < 1) { sValue = 1; }
               const pageCount = Math.ceil(total / pageSize);
-              if (value > pageCount) { value = pageCount; }
+              if (sValue > pageCount) { sValue = pageCount; }
 
-              this._onPagerClick(value);
+              this._onPagerClick(sValue);
             }
           }}
         />
-        页
+        {locale!.pageClassifier}
       </div>
     );
   }
@@ -344,4 +354,4 @@ class Pagination extends Component<PropsType, any> {
   }
 }
 
-export default Pagination;
+export default LocaleReceiver(Pagination, 'Pagination');

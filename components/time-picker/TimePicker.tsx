@@ -3,15 +3,22 @@ import classnames from 'classnames';
 import Dropdown from '../dropdown';
 import Icon from '../icon';
 import TimeSelect from './TimeSelect';
+import LocaleReceiver from '../locale/LocaleReceiver';
+
+type placement = 'bottomLeft' | 'bottomCenter' | 'bottomRight' | 'topLeft' | 'topCenter' | 'topRight';
 
 export interface TimePickerProps {
   value?: any;
   defaultValue?: string;
   placeholder?: string;
   isDisabled?: boolean;
-  isRadius?: string | boolean;
+  isRadius?: string;
   size?: any;
   style?: React.CSSProperties;
+  locale: { clear: string, confirm: string };
+  localeCode: string;
+  dropdownStyle?: React.CSSProperties;
+  placement?: placement;
   onChange?: (value: any) => void;
 }
 
@@ -52,13 +59,15 @@ class TimePicker extends Component<TimePickerProps, any> {
     });
   }
 
-  setDropdown (isOpen, callback) {
+  setDropdown (isOpen, callback?) {
     if (!this.unmounted) { return; }
 
     this.setState({
       dropdown: isOpen,
     }, () => {
-      callback(this.state.value);
+      if (callback) {
+        callback(this.state.value);
+      }
     });
   }
 
@@ -79,8 +88,15 @@ class TimePicker extends Component<TimePickerProps, any> {
     });
   }
 
+  onConfirmBtn () {
+    this.setDropdown(false, this.props.onChange);
+  }
+
   render () {
-    const { defaultValue, placeholder, isDisabled, isRadius, size, ...others } = this.props;
+    const {
+      defaultValue, placeholder, isDisabled, isRadius, size, locale,
+      localeCode, dropdownStyle, placement, onChange, ...others
+    } = this.props;
     const { value, dropdown } = this.state;
     const disabled = 'disabled' in this.props || isDisabled;
     const radius = 'radius' in this.props || isRadius;
@@ -113,7 +129,12 @@ class TimePicker extends Component<TimePickerProps, any> {
           onChange={(value) => this.onDateChange(value)}
         />
         <div className="ui-select-bottom">
-          <a className="clear-btn" href="javascript:;" onClick={() => this.onDateChange('')}>清除</a>
+          <a className="clear-btn" href="javascript:;" onClick={() => this.onDateChange('')}>
+            {locale.clear}
+          </a>
+          <a className="confirm-btn" href="javascript:;" onClick={() => this.onConfirmBtn()}>
+            {locale.confirm}
+          </a>
         </div>
       </Fragment>
     );
@@ -124,9 +145,11 @@ class TimePicker extends Component<TimePickerProps, any> {
           ref={el => this.dropdownEl = el}
           visible={dropdown}
           disabled={disabled}
-          style={{ display: 'block' }}
+          style={{ width: 240, ...dropdownStyle }}
+          zIndex={2020}
           onVisibleChange={this.onVisibleChange}
           overlay={overlay}
+          placement={placement}
         >
           <div
             className="ui-select-selection"
@@ -144,4 +167,4 @@ class TimePicker extends Component<TimePickerProps, any> {
   }
 }
 
-export default TimePicker;
+export default LocaleReceiver(TimePicker, 'TimePicker');

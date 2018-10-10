@@ -7,11 +7,13 @@ interface BasicPropsType {
   overlay?: React.ReactElement<any>;
   placement?: placement;
   className?: string;
+  radius?: boolean;
   isRadius?: boolean;
-  style?: React.CSSProperties;
+  triggerBoxStyle?: React.CSSProperties;
   trigger?: trigger;
   disabled?: boolean;
   zIndex?: number;
+  hideOnClick?: boolean;
   notRenderInDisabledMode?: boolean;
   onVisibleChange(flag: boolean): void;
   getPopupContainer?(): HTMLElement;
