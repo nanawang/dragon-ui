@@ -88,7 +88,8 @@ class Menu extends Component<PropsType, any> {
       mode,
       inlineIndent,
       inlineCollapsed: inlineCollapsed || siderCollapsed,
-    };
+    }
+
     return Children.map(children, (child, index) => {
       const c: ReactElement<any> = child as ReactElement<any>;
       const key = (child as ReactElement<any>).key;

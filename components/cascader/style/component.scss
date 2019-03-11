@@ -1,0 +1,8 @@
+$treePrefixCls: ui-cascader;
+
+.#{$treePrefixCls} {
+  .#{$treePrefixCls}-menu {
+    min-width: 110px;
+  }
+}
+

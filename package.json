@@ -20,6 +20,7 @@
     "frontend",
     "web"
   ],
+
   "license": "MIT",
   "repository": "git://github.com/JeromeLin/dragon-ui",
   "bugs": {

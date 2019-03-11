@@ -278,7 +278,7 @@ class Select extends Component<PropsType, StateProps> {
       const checked = Array.isArray(value) ? value.indexOf(String(elem.value)) > -1 : String(elem.value) === value;
       children.push(
         <Option
-          key={elem.props.value}
+          key         ={elem.props.value}
           showCheckIcon={checked}
           {...elem.props}
           checked={checked}
