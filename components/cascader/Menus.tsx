@@ -22,9 +22,11 @@ class Menus extends React.Component<MenusProps, StateProps> {
   expandIcon = (<Icon type="right" className={`${this.props.prefixCls}-menu-item-expand-icon`} />);
   loadingIcon = (<Icon type="loading" className={`${this.props.prefixCls}-menu-item-loading-icon`} />);
 
+  defaultFieldNames = { label: 'label', value: 'value', children: 'children' };
+
   getFieldName = (name) => {
-    const { fieldNames, defaultFieldNames } = this.props;
-    return fieldNames![name] || defaultFieldNames[name];
+    const { fieldNames } = this.props;
+    return fieldNames![name] || this.defaultFieldNames[name];
   }
 
   getActiveOptions = () => {

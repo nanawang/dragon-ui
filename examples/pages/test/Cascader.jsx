@@ -2,6 +2,7 @@ import React from 'react';
 
 import Cascader from '../../../components/cascader';
 import '../../../components/cascader/style';
+import '../../../components/tag-input/style';
 
 export default class Test extends React.Component {
   constructor(props) {
@@ -42,7 +43,7 @@ export default class Test extends React.Component {
     }];
 
     return (
-      <Cascader options={options} onChange={this.onChange} placeholder="Please select" />
+      <Cascader options={options} onChange={this.onChange} isSearch/>
     );
   }
 }

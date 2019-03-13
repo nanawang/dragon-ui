@@ -1,6 +1,7 @@
-import { MouseEvent } from "react";
+import React, { MouseEvent, ReactNode } from 'react';
 
 export type trigger = 'click' | 'hover';
+export type size = 'xl' | 'lg' | 'sm' | 'xs';
 
 export interface FieldNamesType {
   value?: string;
@@ -10,18 +11,21 @@ export interface FieldNamesType {
 
 export interface CascaderOptionType {
   value?: string;
-  label?: React.ReactNode;
+  label?: ReactNode;
   disabled?: boolean;
   title?: string;
   children?: Array<CascaderOptionType>;
 }
 
 interface BasicPropsType {
+  locale?: { [propName: string]: any };
   prefixCls?: string;
   value?: string[];
+  defaultValue?: string[];
+  activeValue?: string[];
   placeholder?: string;
-  disabled?: boolean;
-  size?: string;
+  isDisabled?: boolean;
+  size?: size;
   className?: string;
   popupClassName?: string;
   style?: React.CSSProperties;
@@ -38,6 +42,10 @@ interface BasicPropsType {
   changeOnSelect?: boolean;
   trigger?: trigger;
   popupVisible?: boolean;
+
+  isSearch?: boolean;
+
+  getPopupContainer?(): HTMLElement;
 }
 
 export type propsType = React.HTMLAttributes<any> & BasicPropsType;
@@ -50,16 +58,17 @@ export interface StateType {
   };
   isPending: boolean;
   animationState: string | null;
+  activeValue?: string[];
 }
 
 export interface MenusProps {
+  size?: size;
   prefixCls?: string;
   visible?: boolean;
   options: CascaderOptionType[];
   value?: string[];
   activeValue?: string[];
   fieldNames?: FieldNamesType;
-  defaultFieldNames: FieldNamesType;
   dropdownMenuColumnStyle?: object;
-  onSelect: (targetOption: CascaderOptionType[] , menuIndex: number, e: MouseEvent) => void;
+  onSelect: (targetOption: CascaderOptionType[], menuIndex: number, e: MouseEvent) => void;
 }

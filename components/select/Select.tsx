@@ -242,6 +242,7 @@ class Select extends Component<PropsType, StateProps> {
       getPopupContainer,
       locale,
     } = props;
+    console.log('locale!.placeholder111', locale);
 
     const disabled = 'disabled' in props || isDisabled;
     const radius = 'radius' in props || isRadius;

@@ -1,15 +1,17 @@
 import * as React from 'react';
 import Dropdown from '../dropdown';
 import Menus from './Menus';
-import InputWithTags from '../checkbox';
+import InputWithTags from '../tag-input';
 import { propsType, CascaderOptionType } from './PropsType';
 import { defaultDisplayRender, getFieldNames, arrayTreeFilter } from './utils';
+import LocaleReceiver from '../locale/LocaleReceiver';
 
 interface StateProps {
-  value: string | string[];
-  dropdown: boolean;
+  value: string[];
+  activeValue: string[];
   searchValue: string | null;
-  showPlacehoder: boolean;
+  placeholder?: string;
+  popupVisible?: boolean;
 }
 
 class Cascader extends React.Component<propsType, StateProps> {
@@ -17,11 +19,14 @@ class Cascader extends React.Component<propsType, StateProps> {
   static defaultProps = {
     prefixCls: 'ui-cascader',
   };
+
   constructor(props: propsType) {
     super(props);
     this.state = {
       value: props.value || props.defaultValue || [],
+      activeValue: props.activeValue || [],
       popupVisible: props.popupVisible,
+      searchValue: '',
     };
   }
 
@@ -45,73 +50,79 @@ class Cascader extends React.Component<propsType, StateProps> {
     return displayRender(label, selectedOptions);
   }
 
+  onMenuSelect = () => {
+    console.log('onMenuSelect');
+  }
+
   render() {
     const { props } = this;
     const {
       prefixCls,
       placeholder,
-      isRadius,
       isDisabled,
       isSearch,
       size,
-      tagTheme,
       style,
       getPopupContainer,
       children,
+      fieldNames,
       locale,
     } = props;
-
     const { popupVisible: _popupVisible } = this.state;
-    const popupVisible = disabled ? false : _popupVisible;
+    const popupVisible = isDisabled ? false : _popupVisible;
 
     const disabled = 'disabled' in props || isDisabled;
 
-    const radius = 'radius' in props || isRadius;
     const search = 'search' in props || isSearch;
 
     let options = props.options;
-    if (state.inputValue) {
-      options = this.generateFilteredOptions(prefixCls);
-    }
-
+    // if (state.inputValue) {
+    //   options = this.generateFilteredOptions(prefixCls);
+    // }
     const menus = (options && options.length > 0)
-      ? (<Menus size={size}>{options}</Menus>)
+      ? (<Menus
+        size={size}
+        fieldNames={getFieldNames(fieldNames)}
+        options={options}
+        onSelect={this.onMenuSelect}
+      />)
       : (<span className={`${prefixCls}-notfound`}>{locale!.noMatch}</span>);
 
     const valueText = this.getLabel();
     return (
-      <Dropdown
-        triggerBoxStyle={style}
-        disabled={disabled}
-        visible={popupVisible}
-        isRadius={radius}
-        overlay={menus}
-        getPopupContainer={getPopupContainer}
-        onVisibleChange={(visible) => {
-          if (visible === true) {
-            this.setState({ dropdown: visible, searchValue: '' });
-          } else {
-            this.setState({ dropdown: visible });
+      <div className={prefixCls}>
+        <Dropdown
+          triggerBoxStyle={style}
+          disabled={disabled}
+          visible={popupVisible}
+          overlay={menus}
+          getPopupContainer={getPopupContainer}
+          onVisibleChange={(visible) => {
+            if (visible === true) {
+              this.setState({ popupVisible: visible, searchValue: '' });
+            } else {
+              this.setState({ popupVisible: visible });
+            }
+          }}
+        >
+          {
+            children ? children
+              : (<InputWithTags
+                size={size}
+                disabled={disabled}
+                style={style}
+                searchValue={this.state.searchValue}
+                search={search}
+                active={popupVisible}
+                value={valueText}
+                placeholder={placeholder || locale!.placeholder}
+                onSearchChange={this.onSearchValueChange}
+              />)
           }
-        }}
-      >
-        children && children.length > 0
-        ? children
-        : (<InputWithTags
-        radius={radius}
-        size={size}
-        disabled={disabled}
-        style={style}
-        searchValue={this.state.searchValue}
-        search={search}
-        active={popupVisible}
-        value={valueText}
-        placeholder={placeholder}
-        onSearchChange={this.onSearchValueChange}
-      />)
-
-      </Dropdown>
+        </Dropdown>
+      </div>
+    );
   }
 }
 
-export default Cascader;
+export default LocaleReceiver(Cascader, 'Cascader');

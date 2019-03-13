@@ -1,8 +1,9 @@
-$treePrefixCls: ui-cascader;
+$cascaderPrefixCls: ui-cascader;
 
-.#{$treePrefixCls} {
-  .#{$treePrefixCls}-menu {
-    min-width: 110px;
+.#{$cascaderPrefixCls} {
+  .tag-input-box {
+    width: 300px;
   }
+
 }
 
