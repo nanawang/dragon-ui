@@ -2,6 +2,7 @@ import React from 'react';
 
 import Cascader from '../../../components/cascader';
 import '../../../components/cascader/style';
+import '../../../components/dropdown/style';
 import '../../../components/tag-input/style';
 
 export default class Test extends React.Component {

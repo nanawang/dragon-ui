@@ -19,7 +19,7 @@ class Menus extends React.Component<MenusProps, StateProps> {
     visible: false,
   };
 
-  expandIcon = (<Icon type="right" className={`${this.props.prefixCls}-menu-item-expand-icon`} />);
+  expandIcon = (<Icon type="arrow-right" className={`${this.props.prefixCls}-menu-item-expand-icon`} />);
   loadingIcon = (<Icon type="loading" className={`${this.props.prefixCls}-menu-item-loading-icon`} />);
 
   defaultFieldNames = { label: 'label', value: 'value', children: 'children' };
@@ -98,9 +98,9 @@ class Menus extends React.Component<MenusProps, StateProps> {
         </ul>
       ));
     return (
-      <React.Fragment>
+      <div className={`${prefixCls}-menus`}>
         {menus}
-      </React.Fragment>
+      </div>
     );
   }
 }

@@ -30,11 +30,9 @@ class Cascader extends React.Component<propsType, StateProps> {
     };
   }
 
-  onSearchValueChange = (e) => {
-    this.setState({
-      searchValue: (e.target as HTMLDivElement).textContent,
-      popupVisible: true,
-    });
+  onSearchValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    this.setState({ searchValue: inputValue });
   }
 
   getLabel = () => {
@@ -92,7 +90,7 @@ class Cascader extends React.Component<propsType, StateProps> {
     return (
       <div className={prefixCls}>
         <Dropdown
-          triggerBoxStyle={style}
+          style={{ ...style, minWidth: 'auto' }}
           disabled={disabled}
           visible={popupVisible}
           overlay={menus}
@@ -112,9 +110,9 @@ class Cascader extends React.Component<propsType, StateProps> {
                 disabled={disabled}
                 style={style}
                 searchValue={this.state.searchValue}
+                value={valueText}
                 search={search}
                 active={popupVisible}
-                value={valueText}
                 placeholder={placeholder || locale!.placeholder}
                 onSearchChange={this.onSearchValueChange}
               />)
