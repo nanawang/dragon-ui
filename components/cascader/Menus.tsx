@@ -22,11 +22,9 @@ class Menus extends React.Component<MenusProps, StateProps> {
   expandIcon = (<Icon type="arrow-right" className={`${this.props.prefixCls}-menu-item-expand-icon`} />);
   loadingIcon = (<Icon type="loading" className={`${this.props.prefixCls}-menu-item-loading-icon`} />);
 
-  defaultFieldNames = { label: 'label', value: 'value', children: 'children' };
-
   getFieldName = (name) => {
-    const { fieldNames } = this.props;
-    return fieldNames![name] || this.defaultFieldNames[name];
+    const { fieldNames, defaultFieldNames } = this.props;
+    return fieldNames![name] || defaultFieldNames[name];
   }
 
   getActiveOptions = () => {
@@ -53,23 +51,23 @@ class Menus extends React.Component<MenusProps, StateProps> {
 
   getOption = (option, menuIndex) => {
     const { prefixCls, onSelect } = this.props;
-    const { loading, disabled } = option;
+    const { loading, disabled, isLeaf } = option;
     const [children, value, label] = [
       option[this.getFieldName('children')],
       option[this.getFieldName('value')],
       option[this.getFieldName('label')],
     ];
-    const hasChildren = children && children.length > 0;
+    const hasChildren = children && children.length > 0 || isLeaf;
     const isActive = this.isActiveOption(option, menuIndex);
     const menuItemCls = classnames({
       [`${prefixCls}-menu-item`]: true,
-      [`${prefixCls}-menu-item-loading`]: !!loading,
       [`${prefixCls}-menu-item-active`]: isActive,
+      [`${prefixCls}-menu-item-expand`]: hasChildren,
       [`${prefixCls}-menu-item-disabled`]: disabled,
     });
     const loadingIcon = !!loading ? this.loadingIcon : null;
     let expandIcon: any = null;
-    if (hasChildren && !loading) {
+    if (hasChildren) {
       expandIcon = this.expandIcon;
     }
 
