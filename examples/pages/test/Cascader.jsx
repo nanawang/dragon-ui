@@ -219,9 +219,11 @@ export default class Test extends React.Component {
     }];
     {/*<Cascader isDisabled options={options} onChange={this.onChange} isSearch value={value} />*/}
     {/*<Cascader options={options} onChange={this.onChange} isSearch value={value} />*/}
+    {/*<Cascader style={{ width: 500 }} options={options} onChange={this.onChange} isSearch />*/}
+    {/*<Cascader style={{ width: 500 }} className="demo-picker" options={options} onChange={this.onChange} isSearch />*/}
 
     return (
-      <Cascader options={options} onChange={this.onChange} isSearch />
+      <Cascader style={{ width: 500 }} changeOnSelect className="demo-picker" options={options} onChange={this.onChange} isSearch />
     );
   }
 }

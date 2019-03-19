@@ -55,6 +55,7 @@ interface BasicPropsType {
   changeOnSelect?: boolean;
 
   popupVisible?: boolean;
+  /** 是否支持搜索 **/
   isSearch?: boolean;
   // 后续完善属性
   // loadData?: (selectedOptions?: CascaderOptionType[]) => void;
@@ -76,7 +77,6 @@ export interface StateType {
 }
 
 export interface MenusProps {
-  size?: size;
   prefixCls?: string;
   visible?: boolean;
   options: CascaderOptionType[];

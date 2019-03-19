@@ -1,4 +1,5 @@
 import * as React from 'react';
+import classnames from 'classnames';
 import Dropdown from '../dropdown';
 import Menus from './Menus';
 import Icon from '../icon';
@@ -21,7 +22,7 @@ class Cascader extends React.Component<propsType, StateProps> {
     prefixCls: 'ui-cascader',
     fieldNames: { label: 'label', value: 'value', children: 'children' },
     allowClear: true,
-    disabled: false,
+    isDisabled: false,
     popupPlacement: 'bottomLeft',
   };
   defaultFieldNames = { label: 'label', value: 'value', children: 'children' };
@@ -78,42 +79,42 @@ class Cascader extends React.Component<propsType, StateProps> {
   }
 
   handleValueChange = (options, props) => {
+    const { activeValue, popupVisible } = props;
     const { onChange } = this.props;
+    this.setState({
+      value: activeValue,
+      activeValue,
+    });
     onChange(options.map(o => o[this.getFieldName('value')]), options);
-    this.setPopupVisible(props.popupVisible);
+    this.setPopupVisible(popupVisible);
   }
 
   onMenuSelect = (targetOption, menuIndex) => {
     const { changeOnSelect, expandTrigger } = this.props;
-    let { activeValue, value } = this.state;
+    let { activeValue } = this.state;
     activeValue = activeValue.slice(0, menuIndex + 1);
     activeValue[menuIndex] = targetOption[this.getFieldName('value')];
     const activeOptions = this.getActiveOptions(activeValue);
-
     if ((targetOption[this.getFieldName('children')] || []).length === 0) {
       // 点击最后一层（叶子节点），则显示选中项并关闭浮层
-      value = activeValue;
       this.setPopupVisible(false);
-      this.handleValueChange(activeOptions, { popupVisible: false });
+      this.handleValueChange(activeOptions, { popupVisible: false, activeValue });
     } else if (changeOnSelect) {
-      const popupVisible = false;
+      let popupVisible = false;
       if (expandTrigger === 'hover') {
         popupVisible = true;
       }
-      this.handleValueChange(activeOptions, { popupVisible });
+      this.handleValueChange(activeOptions, { popupVisible, activeValue });
+    } else {
+      this.setState({ activeValue });
     }
-
-    this.setState({
-      value,
-      activeValue,
-    });
   }
 
   setPopupVisible = (popupVisible) => {
     if (!('popupVisible' in this.props)) {
-      // 如果浮层关闭，则清空搜索框
       this.setState({
         popupVisible,
+        // 如果浮层关闭，则清空搜索框
         searchValue: popupVisible ? this.state.searchValue : '',
       });
     }
@@ -133,13 +134,14 @@ class Cascader extends React.Component<propsType, StateProps> {
     this.setPopupVisible(popupVisible);
   }
 
-  clearSelection = () => {
+  clearSelection = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     const { searchValue } = this.state;
     if (searchValue) {
       this.setState({ searchValue: '' });
     } else {
-      this.setValue([]);
-      this.handlePopupVisibleChange(false);
+      this.handleValueChange([], { popupVisible: false, activeValue: [] });
     }
   }
 
@@ -150,8 +152,9 @@ class Cascader extends React.Component<propsType, StateProps> {
       placeholder,
       isDisabled,
       isSearch,
-      size,
       style,
+      className,
+      popupClassName,
       getPopupContainer,
       children,
       fieldNames,
@@ -161,8 +164,8 @@ class Cascader extends React.Component<propsType, StateProps> {
     const { popupVisible: _popupVisible, activeValue, value, searchValue } = this.state;
     const popupVisible = isDisabled ? false : _popupVisible;
 
-    console.log('value, searchValue', value, searchValue);
     const disabled = 'disabled' in props || isDisabled;
+    console.log('value, searchValue', value, searchValue, isDisabled);
 
     const search = 'search' in props || isSearch;
 
@@ -174,7 +177,6 @@ class Cascader extends React.Component<propsType, StateProps> {
       ? (<Menus
         value={value}
         activeValue={activeValue}
-        size={size}
         fieldNames={getFieldNames(fieldNames)}
         defaultFieldNames={this.defaultFieldNames}
         options={options}
@@ -185,27 +187,28 @@ class Cascader extends React.Component<propsType, StateProps> {
     const valueText = this.getLabel();
     const clearIcon = (allowClear && !disabled && value.length > 0) || searchValue ? (
       <Icon
-        type="cross-circle"
+        type="wrong-round-fill"
         className={`${prefixCls}-picker-clear`}
         onClick={this.clearSelection}
       />
     ) : null;
+    const pickerCls = classnames(className, `${prefixCls}-picker`);
     return (
       <div className={prefixCls}>
         <Dropdown
-          style={{ ...style, minWidth: 'auto' }}
+          style={{ minWidth: 'auto' }}
           disabled={disabled}
           visible={popupVisible}
           overlay={menus}
           getPopupContainer={getPopupContainer}
           onVisibleChange={this.handlePopupVisibleChange}
+          className={popupClassName}
         >
           {
             children ? children
               : (
-                <span className={`${prefixCls}-picker`} style={style}>
+                <div className={pickerCls} style={style}>
                   <InputWithTags
-                    size={size}
                     disabled={disabled}
                     style={style}
                     searchValue={searchValue}
@@ -216,7 +219,7 @@ class Cascader extends React.Component<propsType, StateProps> {
                     onSearchChange={this.onSearchValueChange}
                   />
                   {clearIcon}
-                </span>
+                </>
               )
           }
         </Dropdown>

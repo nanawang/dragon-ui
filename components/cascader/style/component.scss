@@ -11,6 +11,34 @@ $highlight-color: #f5222d;
     width: 300px;
   }
 
+  &-picker {
+    position: relative;
+
+    &-clear {
+      position: absolute;
+      right: $base-padding;
+      z-index: 2;
+      background: #fff;
+      top: 50%;
+      color: $base-btn-default-bg;
+      width: 16px;
+      height: 16px;
+      margin-top: -6px;
+      line-height: 12px;
+      cursor: pointer;
+      transition: color 0.3s ease, opacity 0.15s ease;
+      opacity: 0;
+
+      &:hover {
+        color: darken($base-btn-default-bg, 10%);
+      }
+    }
+
+    &:hover &-clear {
+      opacity: 1;
+    }
+  }
+
   &-menus {
     font-size: $base-fontSize;
     background: $menu-default-bg-color;
