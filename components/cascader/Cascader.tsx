@@ -4,14 +4,14 @@ import Dropdown from '../dropdown';
 import Menus from './Menus';
 import Icon from '../icon';
 import InputWithTags from '../tag-input';
-import { propsType, CascaderOptionType } from './PropsType';
-import { defaultDisplayRender, getFieldNames, arrayTreeFilter } from './utils';
+import { propsType, CascaderOptionType, FieldNamesType } from './PropsType';
+import { defaultDisplayRender, getFieldNames, arrayTreeFilter, filterOptionRender, hasFilterOption } from './utils';
 import LocaleReceiver from '../locale/LocaleReceiver';
 
 interface StateProps {
   value: string[];
   activeValue: string[];
-  searchValue: string | null;
+  searchValue: string;
   placeholder?: string;
   popupVisible?: boolean;
 }
@@ -23,9 +23,12 @@ class Cascader extends React.Component<propsType, StateProps> {
     fieldNames: { label: 'label', value: 'value', children: 'children' },
     allowClear: true,
     isDisabled: false,
+    changeOnSelect: false,
     popupPlacement: 'bottomLeft',
   };
   defaultFieldNames = { label: 'label', value: 'value', children: 'children' };
+  cachedOptions: CascaderOptionType[];
+  flattenedOptions: CascaderOptionType[][];
 
   constructor(props: propsType) {
     super(props);
@@ -35,6 +38,8 @@ class Cascader extends React.Component<propsType, StateProps> {
       popupVisible: props.popupVisible,
       searchValue: '',
     };
+    const { options, changeOnSelect, fieldNames } = this.props;
+    this.flattenedOptions = this.flattenOptions(options, changeOnSelect, fieldNames);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -44,10 +49,31 @@ class Cascader extends React.Component<propsType, StateProps> {
         activeValue: nextProps.activeValue,
       });
     }
+    if (nextProps.showSearch && this.props.options !== nextProps.options) {
+      this.flattenedOptions = this.flattenOptions(nextProps.options, nextProps.changeOnSelect, nextProps.fieldNames);
+    }
+  }
+
+  flattenOptions = (
+    options: CascaderOptionType[], changeOnSelect: boolean,
+    fieldNames: FieldNamesType, linkedPath: CascaderOptionType[] = [],
+  ): CascaderOptionType[][] => {
+    const childrenName = getFieldNames(fieldNames).children;
+    return options.reduce((total, currentOption: CascaderOptionType) => {
+      const path = linkedPath.concat(currentOption);
+      const children = currentOption[childrenName];
+      if (changeOnSelect || !(children || []).length) {
+        total.push(path);
+      }
+      if ((children || []).length > 0) {
+        total = total.concat(this.flattenOptions(children, changeOnSelect, fieldNames, path));
+      }
+      return total;
+    }, []);
   }
 
   getActiveOptions = (values) => {
-    const activeValue = values || this.props.activeValue;
+    const activeValue = values || this.props.value;
     const options = this.props.options;
     return arrayTreeFilter(options,
       (o, level) => o[this.getFieldName('value')] === activeValue![level],
@@ -68,7 +94,6 @@ class Cascader extends React.Component<propsType, StateProps> {
     const { options, displayRender = defaultDisplayRender as Function, fieldNames } = this.props;
     const names = getFieldNames(fieldNames);
     const value = this.state.value;
-    console.log('getLabel value', value);
     const valueArray = Array.isArray(value[0]) ? value[0] : value;
     const selectedOptions: CascaderOptionType[] = arrayTreeFilter(options,
       (o: CascaderOptionType, level: number) => o[names.value] === valueArray[level],
@@ -100,9 +125,9 @@ class Cascader extends React.Component<propsType, StateProps> {
       this.setPopupVisible(false);
       this.handleValueChange(activeOptions, { popupVisible: false, activeValue });
     } else if (changeOnSelect) {
-      let popupVisible = false;
+      let popupVisible = true;
       if (expandTrigger === 'hover') {
-        popupVisible = true;
+        popupVisible = false;
       }
       this.handleValueChange(activeOptions, { popupVisible, activeValue });
     } else {
@@ -145,6 +170,25 @@ class Cascader extends React.Component<propsType, StateProps> {
     }
   }
 
+  getFilteredOptions = () => {
+    const { fieldNames: fieldNamesProps, prefixCls, locale } = this.props;
+    const { searchValue } = this.state;
+    const fieldNames = getFieldNames(fieldNamesProps);
+    const filteredPathOptions = this.flattenedOptions.filter(
+      (optionPath) => hasFilterOption(searchValue, optionPath, fieldNames),
+    );
+    if (filteredPathOptions.length > 0) {
+      return filteredPathOptions.map((path: CascaderOptionType[]) => {
+        return {
+          [fieldNames.label]: filterOptionRender(searchValue, path, fieldNames, prefixCls),
+          [fieldNames.value]: path.map((o: CascaderOptionType) => o[fieldNames.value]),
+          disabled: path.some((o: CascaderOptionType) => !!o.disabled),
+        };
+      });
+    }
+    return [{ [fieldNames.label]: locale!.noMatch, [fieldNames.value]: 'noMatch', disabled: true }];
+  }
+
   render() {
     const { props } = this;
     const {
@@ -165,14 +209,20 @@ class Cascader extends React.Component<propsType, StateProps> {
     const popupVisible = isDisabled ? false : _popupVisible;
 
     const disabled = 'disabled' in props || isDisabled;
-    console.log('value, searchValue', value, searchValue, isDisabled);
 
     const search = 'search' in props || isSearch;
 
     let options = props.options;
-    // if (state.searchValue) {
-    //   options = this.generateFilteredOptions(prefixCls);
-    // }
+    if (searchValue) {
+      options = this.getFilteredOptions();
+    }
+
+    if (!_popupVisible) {
+      options = this.cachedOptions;
+    } else {
+      this.cachedOptions = options;
+    }
+
     const menus = (options && options.length > 0)
       ? (<Menus
         value={value}
@@ -219,7 +269,7 @@ class Cascader extends React.Component<propsType, StateProps> {
                     onSearchChange={this.onSearchValueChange}
                   />
                   {clearIcon}
-                </>
+                </div>
               )
           }
         </Dropdown>

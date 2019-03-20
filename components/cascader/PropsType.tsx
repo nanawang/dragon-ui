@@ -4,9 +4,9 @@ export type expandTrigger = 'click' | 'hover';
 export type size = 'xl' | 'lg' | 'sm' | 'xs';
 
 export interface FieldNamesType {
-  value?: string;
-  label?: string;
-  children?: string;
+  value: string;
+  label: string;
+  children: string;
 }
 
 export interface CascaderOptionType {
@@ -20,7 +20,7 @@ export interface CascaderOptionType {
 
 interface BasicPropsType {
   locale?: { [propName: string]: any };
-  prefixCls?: string;
+  prefixCls: string;
   /** 指定选中项 */
   value?: string[];
   /** 默认的选中项 */
@@ -50,9 +50,9 @@ interface BasicPropsType {
   displayRender?: (label: string[], selectedOptions?: CascaderOptionType[]) => React.ReactNode;
   /** 浮层显示or隐藏的回调 */
   onPopupVisibleChange?: (popupVisible: boolean) => void;
-  fieldNames?: FieldNamesType;
+  fieldNames: FieldNamesType;
   /** 为true表示选择后即改变，可选择父级 */
-  changeOnSelect?: boolean;
+  changeOnSelect: boolean;
 
   popupVisible?: boolean;
   /** 是否支持搜索 **/
