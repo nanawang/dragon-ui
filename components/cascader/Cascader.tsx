@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import classnames from 'classnames';
 import Dropdown from '../dropdown';
 import Menus from './Menus';
@@ -46,7 +46,11 @@ class Cascader extends React.Component<propsType, StateProps> {
     if ('value' in nextProps && nextProps.value !== this.props.value) {
       this.setState({
         value: nextProps.value,
-        activeValue: nextProps.activeValue,
+      });
+    }
+    if ('popupVisible' in nextProps) {
+      this.setState({
+        popupVisible: nextProps.popupVisible,
       });
     }
     if (nextProps.showSearch && this.props.options !== nextProps.options) {
@@ -94,9 +98,11 @@ class Cascader extends React.Component<propsType, StateProps> {
     const { options, displayRender = defaultDisplayRender as Function, fieldNames } = this.props;
     const names = getFieldNames(fieldNames);
     const value = this.state.value;
-    const valueArray = Array.isArray(value[0]) ? value[0] : value;
+    if (value.length === 0) {
+      return '';
+    }
     const selectedOptions: CascaderOptionType[] = arrayTreeFilter(options,
-      (o: CascaderOptionType, level: number) => o[names.value] === valueArray[level],
+      (o: CascaderOptionType, level: number) => o[names.value] === value[level],
       { childrenKeyName: names.children },
     );
     const label = selectedOptions.map(o => o[names.label]);
@@ -114,17 +120,27 @@ class Cascader extends React.Component<propsType, StateProps> {
     this.setPopupVisible(popupVisible);
   }
 
-  onMenuSelect = (targetOption, menuIndex) => {
-    const { changeOnSelect, expandTrigger } = this.props;
+  onMenuSelect = (targetOption, menuIndex, e) => {
+    const { changeOnSelect, expandTrigger, loadData } = this.props;
     let { activeValue } = this.state;
     activeValue = activeValue.slice(0, menuIndex + 1);
     activeValue[menuIndex] = targetOption[this.getFieldName('value')];
     const activeOptions = this.getActiveOptions(activeValue);
-    if ((targetOption[this.getFieldName('children')] || []).length === 0) {
+    const hasChildren: boolean = (targetOption[this.getFieldName('children')] || []).length > 0;
+    if (targetOption.isLeaf === false && !hasChildren && loadData) {
+      if (changeOnSelect) {
+        this.handleValueChange(activeOptions, { popupVisible: true, activeValue });
+      } else {
+        this.setState({ activeValue });
+      }
+      loadData(targetOption, activeValue, activeOptions);
+      return;
+    }
+    if (!hasChildren) {
       // 点击最后一层（叶子节点），则显示选中项并关闭浮层
       this.setPopupVisible(false);
       this.handleValueChange(activeOptions, { popupVisible: false, activeValue });
-    } else if (changeOnSelect) {
+    } else if (changeOnSelect && e.type === 'click') {
       let popupVisible = true;
       if (expandTrigger === 'hover') {
         popupVisible = false;
@@ -186,7 +202,7 @@ class Cascader extends React.Component<propsType, StateProps> {
         };
       });
     }
-    return [{ [fieldNames.label]: locale!.noMatch, [fieldNames.value]: 'noMatch', disabled: true }];
+    return [];
   }
 
   render() {
@@ -196,6 +212,7 @@ class Cascader extends React.Component<propsType, StateProps> {
       placeholder,
       isDisabled,
       isSearch,
+      expandTrigger,
       style,
       className,
       popupClassName,
@@ -222,7 +239,7 @@ class Cascader extends React.Component<propsType, StateProps> {
     } else {
       this.cachedOptions = options;
     }
-
+    const notFoundStyle = { width: style.width || 108 };
     const menus = (options && options.length > 0)
       ? (<Menus
         value={value}
@@ -230,9 +247,10 @@ class Cascader extends React.Component<propsType, StateProps> {
         fieldNames={getFieldNames(fieldNames)}
         defaultFieldNames={this.defaultFieldNames}
         options={options}
+        expandTrigger={expandTrigger}
         onSelect={this.onMenuSelect}
       />)
-      : (<span className={`${prefixCls}-notfound`}>{locale!.noMatch}</span>);
+      : (<span className={`${prefixCls}-notfound`} style={notFoundStyle}>{locale!.noMatch}</span>);
 
     const valueText = this.getLabel();
     const clearIcon = (allowClear && !disabled && value.length > 0) || searchValue ? (

@@ -58,7 +58,8 @@ interface BasicPropsType {
   /** 是否支持搜索 **/
   isSearch?: boolean;
   // 后续完善属性
-  // loadData?: (selectedOptions?: CascaderOptionType[]) => void;
+  loadData?: (targetOption: CascaderOptionType, activeValue: string[], activeOptions?: CascaderOptionType[],) => void;
+
   // size?: size;
   getPopupContainer?(): HTMLElement;
 }
@@ -83,6 +84,7 @@ export interface MenusProps {
   value?: string[];
   activeValue?: string[];
   fieldNames?: FieldNamesType;
+  expandTrigger?: expandTrigger;
   defaultFieldNames: FieldNamesType;
   dropdownMenuColumnStyle?: object;
   onSelect: (targetOption: CascaderOptionType[], menuIndex: number, e: MouseEvent) => void;

@@ -17,6 +17,7 @@ class Menus extends React.Component<MenusProps, StateProps> {
     fieldNames: [],
     prefixCls: 'ui-cascader',
     visible: false,
+    expandTrigger: 'click',
   };
 
   expandIcon = (<Icon type="arrow-right" className={`${this.props.prefixCls}-menu-item-expand-icon`} />);
@@ -50,7 +51,7 @@ class Menus extends React.Component<MenusProps, StateProps> {
   }
 
   getOption = (option, menuIndex) => {
-    const { prefixCls, onSelect } = this.props;
+    const { prefixCls, expandTrigger } = this.props;
     const { loading, disabled, isLeaf } = option;
     const [children, value, label] = [
       option[this.getFieldName('children')],
@@ -64,21 +65,34 @@ class Menus extends React.Component<MenusProps, StateProps> {
       [`${prefixCls}-menu-item-active`]: isActive,
       [`${prefixCls}-menu-item-expand`]: hasChildren,
       [`${prefixCls}-menu-item-disabled`]: disabled,
+      [`${prefixCls}-menu-item-loading`]: loading,
     });
     const loadingIcon = !!loading ? this.loadingIcon : null;
     let expandIcon: any = null;
-    if (hasChildren) {
+    if (hasChildren || isLeaf === false) {
       expandIcon = this.expandIcon;
     }
 
+    const onSelect = (e) => {
+      if (!disabled) {
+        this.props.onSelect(option, menuIndex, e);
+      }
+    };
+    let expandProps: any = {
+      onClick: onSelect,
+    };
+    if (expandTrigger === 'hover' && hasChildren) {
+      expandProps = {
+        ...expandProps,
+        onMouseEnter: onSelect,
+      };
+    }
     return (
       <li
         className={menuItemCls}
         key={value}
         title={label}
-        onClick={(e) => {
-          onSelect(option, menuIndex, e);
-        }}
+        {...expandProps}
       >
         {label}
         {expandIcon}

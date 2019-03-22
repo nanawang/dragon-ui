@@ -5,6 +5,8 @@ $active-color: #1890ff;
 $disabled-color: #f3f5f7;
 $background-color-base: #d5f1fd;
 $highlight-color: #f5222d;
+$menuItem-disabled-backgroundColor: #e6e6e6;
+$menuItem-disabled-color: #333;
 
 .#{$cascaderPrefixCls} {
   .tag-input-box {
@@ -82,18 +84,16 @@ $highlight-color: #f5222d;
     white-space: nowrap;
     transition: all 0.3s;
 
-    &:hover {
+    &:hover:not(&-disabled) {
       background: $item-hover-bg;
       color: $hover-color;
     }
 
     &-disabled {
       cursor: not-allowed;
-      color: $disabled-color;
-
-      &:hover {
-        background: transparent;
-      }
+      color: $menuItem-disabled-color;
+      background: $menuItem-disabled-backgroundColor;
+      opacity: .65;
     }
 
     &-expand {
@@ -108,11 +108,16 @@ $highlight-color: #f5222d;
       }
     }
 
+    &-loading {
+      .#{$cascaderPrefixCls}-menu-item-expand-icon {
+        opacity: 0;
+      }
+    }
+
     &-expand-icon,
     &-loading-icon {
       position: absolute;
       right: 5px;
-
       &:after {
         position: absolute;
         font-size: 12px;
@@ -121,9 +126,22 @@ $highlight-color: #f5222d;
       }
     }
 
+    &-loading-icon {
+      animation: rotate360 1s linear infinite;
+    }
+
     &-keyword {
       color: $highlight-color;
     }
+  }
+}
+
+.ui-dropdown {
+
+  .ui-cascader-notfound {
+    display: block;
+    padding: 8px;
+    color: #ccc;
   }
 }
 
