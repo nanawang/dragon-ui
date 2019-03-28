@@ -9,6 +9,7 @@ export default {
     },
     Layout: {
       Layout: '../pages/layout',
+      Grid: '../pages/grid',
     },
     Form: {
       Radio: '../pages/radio',
@@ -23,6 +24,7 @@ export default {
       TimePicker: '../pages/timepicker',
       Upload: '../pages/upload',
       Form: '../pages/form',
+      Cascader: '../pages/cascader',
     },
     Data: {
       Table: '../pages/table',
@@ -55,6 +57,7 @@ export default {
       Popconfirm: '../pages/popconfirm',
       Mask: '../pages/mask',
       Swipe: '../pages/swipe',
+      Transition: '../pages/transition',
     },
   },
 };

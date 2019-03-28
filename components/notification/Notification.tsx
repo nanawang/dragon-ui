@@ -1,54 +1,41 @@
 import React, { Component } from 'react';
 import classnames from 'classnames';
+import Transition from '../transition';
 import NotificationProps from './PropsType';
 import Icon from '../icon';
-import Events from '../utils/events';
 
 export default class Notification extends Component<NotificationProps, any> {
   static defaultProps = {
-    title: '',
+    prefixCls: 'za-notification',
     message: '',
-    top: 16,
-    duration: 4500,
+    top: 20,
+    stayTime: 3000,
     onClick: () => {},
+    onClose: () => {},
   };
 
   state = {
     visible: false,
-    animationState: 'enter',
   };
 
   private timeout: number | undefined;
+  private offsetHeight;
   private notification: any;
-  private animateCb: () => void;
 
   componentDidMount () {
-    this.animateCb = () => {
-      if (this.state.animationState === 'leave') {
-        this.props.willUnMount(this.notification.offsetHeight, parseInt(this.notification.style.top, 10));
-      }
-    };
-    Events.on(this.notification, 'transitionend', this.animateCb);
-    Events.on(this.notification, 'animationend', this.animateCb);
-
     this.enter();
     this.startTimer();
   }
 
   componentWillUnmount () {
-    if (this.state.animationState === 'leave') {
-      this.stopTimer();
-    }
-
-    Events.off(this.notification, 'transitionend', this.animateCb);
-    Events.off(this.notification, 'animationend', this.animateCb);
+    clearInterval(this.timeout);
   }
 
   startTimer () {
-    if (this.props.duration) {
+    if (this.props.stayTime) {
       this.timeout = setTimeout(() => {
         this.onClose();
-      }, this.props.duration);
+      }, this.props.stayTime);
     }
   }
 
@@ -57,63 +44,87 @@ export default class Notification extends Component<NotificationProps, any> {
   }
 
   enter () {
-    this.setState({
-      animationState: 'enter',
-      visible: true,
-    });
+    this.setState({ visible: true });
   }
 
   leave () {
-    this.notification.style.animation = 'notification-out .3s';
-    this.setState({
-      animationState: 'leave',
-      visible: false,
-    });
+    this.setState({ visible: false });
   }
 
-  onClick = () => {
+  onClick = (event: React.SyntheticEvent<any>) => {
     if (this.props.onClick) {
-      this.props.onClick();
+      this.props.onClick(event);
     }
   }
 
-  onClose = () => {
+  onClose = (event?: React.SyntheticEvent<any>) => {
+    const { onClose } = this.props;
+
     this.stopTimer();
     this.leave();
+
+    if (typeof onClose === 'function') {
+      event!.stopPropagation();
+      onClose(event);
+    }
+  }
+
+  onMouseEnter = () => {
+    this.stopTimer();
+  }
+
+  onMouseLeave = () => {
+    this.startTimer();
   }
 
   get type () {
-    switch (this.props.type) {
+    switch (this.props.theme) {
       case 'success':
         return 'right-round-fill';
-      case 'error':
+      case 'danger':
         return 'wrong-round-fill';
-      case 'info':
+      case 'primary':
         return 'info-round-fill';
       case 'warning':
         return 'warning-round-fill';
+      case 'loading':
+        return 'loading';
       default:
         return '';
     }
   }
 
   render () {
+    const { prefixCls, className, top, style, title, message, theme, isMessage, willUnMount, btn } = this.props;
+    const { visible } = this.state;
+
     return (
-      <div
-        ref={el => this.notification = el}
-        className={classnames('ui-notification', this.props.className)}
-        onClick={this.onClick}
-        style={{ top: this.props.top }}
+      <Transition
+        visible={visible}
+        name={isMessage ? 'message' : 'notification'}
+        duration={500}
+        unmountOnHide
+        onStart={() => this.offsetHeight = this.notification.offsetHeight}
+        onBeforeHide={() => willUnMount(this.offsetHeight, parseInt(this.notification.style.top, 10))}
       >
-        <div className={classnames('ui-notification-wrap', { 'has-icon': !!this.props.type })}>
-          <div className="ui-notification-close" onClick={this.onClose}>
-            <Icon type="wrong"/>
+        <div
+          ref={el => this.notification = el}
+          className={classnames(prefixCls, className)}
+          onClick={this.onClick}
+          style={{ ...style, top }}
+        >
+          <div className={classnames('za-notification__content', { 'has-icon': theme })}>
+            {!isMessage && <div className="za-notification__close" onClick={this.onClose}><Icon type="wrong"/></div>}
+            {!isMessage && theme && <Icon type={this.type} className="za-notification__icon" theme={theme} />}
+            {title && <div className="za-notification__title">{title}</div>}
+            <div className="za-notification__custom-content" onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
+              {<Icon type={this.type} className="za-notification__icon" theme={theme} />}
+              <div className="za-notification__description">{message}</div>
+              {!isMessage && <span className="za-notification__action-area">{btn}</span>}
+            </div>
           </div>
-          {this.props.type && <Icon type={this.type} className="ui-notification-icon" theme={this.props.type} />}
-          <h2 className="ui-notification-title">{this.props.title}</h2>
-          <div className="ui-notification-content">{this.props.message}</div>
         </div>
-      </div>
+      </Transition>
     );
   }
 }
