@@ -1,11 +1,19 @@
+import React from 'react';
+
 export default interface PropsType {
-  top: number | string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  title: string;
-  message: string;
-  duration: number | string;
-  timeout: null;
-  willUnMount: any;
-  onClick: any;
-  className: string;
+  prefixCls?: string;
+  style?: React.CSSProperties;
+  top?: number | string;
+  theme?: 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'loading';
+  title?: string;
+  message?: string;
+  stayTime?: number | string;
+  btn: React.ReactElement<any>;
+  timeout?: null;
+  willUnMount?: any;
+  onClick?: (e?: React.SyntheticEvent<any>) => void;
+  onClose?: (e?: React.SyntheticEvent<any>) => void;
+  className?: string;
+  isMessage?: boolean;
+  key?: string;
 }

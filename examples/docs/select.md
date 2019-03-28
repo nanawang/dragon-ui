@@ -12,33 +12,54 @@
   constructor(props) {
     super(props)
     this.state = {
-      selectValue: '',
-      options: [1,2,3]
+      value: '',
+      data: []
     };
+    this.ref = React.createRef();
   }
   componentDidMount(){
     setTimeout(()=>{
-      this.setState({options:[4,5,6]});
-    },1000);
+      // mock async data
+      this.setState({
+        data: [
+          {
+            value: '',
+            text: '全部',
+          },
+          {
+            value: 'a',
+            text: '我是A'
+          },
+          {
+            value: 'b',
+            text: '我是B'
+          }
+        ]
+      });
+      console.log(this.ref.current);
+    }, 1000);
   }
   render() {
-    const { options } = this.state;
+    const { data } = this.state;
     return (
       <div>
         <Select
           style={{ width: 200 }}
-          value={this.state.selectValue}
+          ref={this.ref}
           onChange={(data) => {
             console.log(data);
             this.setState({
               selectValue : data.value,
             });
         }}>
-          <Select.Option value="a">我是A</Select.Option>
-          <Select.Option value="b" disabled>我是B</Select.Option>
-          <Select.Option value="c">我是C</Select.Option>
-          <Select.Option value="d">我是D</Select.Option>
-          {options.map(elem=><div key={elem} value={elem}><span>{elem}</span></div>)}
+          {
+            data.map(({ value, text }) => {
+              return (
+                <Select.Option key={value} value={value}>{text}</Select.Option>
+              )
+            })
+          }
+
         </Select>
       </div>
     )
@@ -73,7 +94,7 @@
 ```
 :::
 
-### 带搜索框
+### 支持本地搜索
 
 支持输入框搜索选项。
 
@@ -107,6 +128,51 @@
           <Select.Option value="b">我是B</Select.Option>
           <Select.Option value="c">我是C</Select.Option>
           <Select.Option value="d">我是D</Select.Option>
+        </Select>
+      </div>
+    )
+  }
+```
+:::
+
+### 支持远程搜索
+
+支持输入框搜索选项。
+
+:::demo 添加`search`属性，通过`onSearchChange`监听输入框值的变化。
+
+```js
+  constructor(props) {
+    super(props)
+    this.state = {
+      selectValue: '',
+      options: []
+    }
+  }
+
+  render() {
+    return (
+      <div>
+        <Select
+          remoteSearch
+          value={this.state.selectValue}
+          style={{ width: 200 }}
+          searchPlaceholder="输入关键字"
+          onSearchChange={(value) => {
+            console.log(value)
+             setTimeout(() => {
+                this.setState({ options: [`${value}1`,`${value}2`,`${value}3`,`${value}4`,`${value}5`] })
+             }, 1000)
+          }}
+          onChange={(data) => {
+            this.setState({
+              selectValue: data.value
+            }, () => {
+              console.log(this.state.selectValue);
+            });
+          }}
+        >
+          {this.state.options.map(elem => <Select.Option key={elem} value={elem}>{elem}</Select.Option>)}
         </Select>
       </div>
     )
@@ -151,13 +217,14 @@
           <Select.Option value="f">我是F</Select.Option>
           <Select.Option value="g">我是G</Select.Option>
           <Select.Option value="h">我是H</Select.Option>
+          <Select.Option value="">我的value是空字符串</Select.Option>
         </Select>
       </div>
     )
   }
 ```
 :::
-  
+
 
 ### 多选并支持查找
 
@@ -211,7 +278,7 @@ type selectedValueData = Array<{value:string; text:ReactNode; index:number}>;
 ```
 + onChange回调的参数中的`value`值类型始终为`string`;
 + 当`multiple`属性为`true`时,若参数`value`中存在目前`option`列表中不存在的元素：则不会显示该元素，但也不会删除该元素。例如：
-```
+```js
   this.state = {
       selectValue: ['i am not the one']
   }
@@ -272,95 +339,6 @@ type selectedValueData = Array<{value:string; text:ReactNode; index:number}>;
 ```
 :::
 
-### 多选穿梭框
-
-使用`Select.Multiple`实现。
-
-:::demo
-
-```js
-  constructor(props) {
-    super(props)
-    this.state = {
-      mulSelectLeft: [
-        {value: 1, name: '我是选项一'},
-        {value: 2, name: '我是选项二'},
-        {value: 3, name: '我是选项三'},
-        {value: 4, name: '我是选项四'},
-      ],
-      mulSelectLeftValue: [],
-      mulSelectRight: [],
-      mulSelectRightValue: [],
-    }
-  }
-  render() {
-    return (
-      <div>
-        <Select.Multiple
-          style={{ width: 200, height: 200 }}
-          value={this.state.mulSelectLeftValue}
-          onChange={(selectedRows, row) => {
-            this.setState({ mulSelectLeftValue: selectedRows });
-          }}
-        >
-          {
-            this.state.mulSelectLeft.map((option, index) => {
-              return <Select.Option key={index} value={option.value}>{option.name}</Select.Option>
-            })
-          }
-        </Select.Multiple>
-
-        <span style={{margin: '-10px 10px 0 10px', textAlign: 'center', verticalAlign: 'middle', display: 'inline-block'}}>
-          <Button
-            radius
-            style={{float: 'left', clear: 'both'}}
-            isDisabled={this.state.mulSelectLeftValue.length == 0}
-            onClick={() => {
-              const mulSelectLeft = [...this.state.mulSelectLeft].filter(item => (this.state.mulSelectLeftValue.indexOf(item.value) < 0) && item);
-              let selected = [...this.state.mulSelectLeft].filter(item => (this.state.mulSelectLeftValue.indexOf(item.value) > -1) && item);
-              let mulSelectRight = this.state.mulSelectRight.concat(selected);
-              this.setState({
-                mulSelectLeft,
-                mulSelectRight,
-                mulSelectLeftValue: [],
-                mulSelectRightValue: []
-            });
-          }}><Icon type="add" /></Button>
-          <Button
-            radius
-            style={{float: 'left', clear: 'both', marginTop: 10}}
-            isDisabled={this.state.mulSelectRightValue.length == 0}
-            onClick={()=> {
-              const mulSelectRight = [...this.state.mulSelectRight].filter(item => (this.state.mulSelectRightValue.indexOf(item.value) < 0) && item);
-              let selected = [...this.state.mulSelectRight].filter(item => (this.state.mulSelectRightValue.indexOf(item.value) > -1) && item);
-              let mulSelectLeft = this.state.mulSelectLeft.concat(selected);
-              this.setState({
-                mulSelectLeft,
-                mulSelectRight,
-                mulSelectLeftValue: [],
-                mulSelectRightValue: []
-            });
-          }}><Icon type="minus" /></Button>
-        </span>
-
-        <Select.Multiple
-          style={{width: 200, height: 200}}
-          value={this.state.mulSelectRightValue}
-          onChange={(selectedRows, row) => {
-            this.setState({ mulSelectRightValue: selectedRows });
-          }}
-        >
-          {
-            this.state.mulSelectRight.map((option, index) => {
-              return <Select.Option key={index} value={option.value}>{option.name}</Select.Option>
-            })
-          }
-        </Select.Multiple>
-      </div>
-    )
-  }
-```
-:::
 
 ### Select Attributes
 | 参数      | 说明    | 类型      | 可选值       | 默认值   |
@@ -369,7 +347,8 @@ type selectedValueData = Array<{value:string; text:ReactNode; index:number}>;
 | defaultValue     | 默认选中值   | string  |   - |     1  |
 | radius     | 是否圆角   | boolean   | — | false  |
 | search     | 是否支持搜索   | boolean    | — | false   |
-| disabled     | 是否禁用   | boolean   | — | false  |
+| disabled  | 禁用    | -   | -  | -   |
+| isDisabled  | 是否禁用    | boolean   | true, false   | false   |
 | tagTheme     | 多选状态下的tag标签主题   | string   | — | default  |
 | size | Select组件的大小 | string | xs,sm,lg,xl | - |
 
@@ -386,7 +365,8 @@ type selectedValueData = Array<{value:string; text:ReactNode; index:number}>;
 | value     | 选中值   | string |   -            |    -   |
 | defaultValue     | 默认选中值   | string  |   - |     1  |
 | radius     | 是否圆角   | boolean   | — | false  |
-| disabled     | 是否禁用   | boolean   | — | false  |
+| disabled  | 禁用    | -   | -  | -   |
+| isDisabled  | 是否禁用    | boolean   | true, false   | false   |
 
 ### Select.Multiple Events
 | 事件名称 | 说明 | 回调参数 |

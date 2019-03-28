@@ -1,6 +1,6 @@
 {
-  "name": "dragon-ui",
-  "version": "1.0.0-alpha.16",
+  "name": "zarm-web",
+  "version": "0.0.0",
   "description": "基于 React 的桌面端UI库",
   "tags": [
     "dragon-ui",
@@ -22,9 +22,9 @@
   ],
 
   "license": "MIT",
-  "repository": "git://github.com/JeromeLin/dragon-ui",
+  "repository": "git://github.com/JeromeLin/zarm-web",
   "bugs": {
-    "url": "https://github.com/JeromeLin/dragon-ui"
+    "url": "https://github.com/JeromeLin/zarm-web"
   },
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -52,10 +52,10 @@
     "release": "bash scripts/release.sh"
   },
   "dependencies": {
+    "async-validator": "^1.10.1",
     "classnames": "^2.2.5",
     "css-animation": "^1.2.5",
     "hoist-non-react-statics": "^3.0.1",
-    "normalize.css": "^7.0.0",
     "rc-animate": "^3.0.0-rc.5",
     "tslib": "^1.9.3"
   },
@@ -90,9 +90,9 @@
     "cross-env": "^5.2.0",
     "css-loader": "^0.28.1",
     "cssnano": "^3.10.0",
-    "enzyme": "^3.1.0",
-    "enzyme-adapter-react-16": "^1.0.3",
-    "enzyme-to-json": "^3.2.0",
+    "enzyme": "^3.8.0",
+    "enzyme-adapter-react-16": "^1.8.0",
+    "enzyme-to-json": "^3.3.5",
     "eslint": "^4.19.1",
     "eslint-config-za": "^1.0.1",
     "eslint-plugin-import": "^2.7.0",
@@ -117,7 +117,7 @@
     "jest": "^21.2.1",
     "lint-staged": "^4.3.0",
     "marked": "^0.4.0",
-    "mini-css-extract-plugin": "^0.4.0",
+    "mini-css-extract-plugin": "^0.4.5",
     "node-sass": "^4.5.2",
     "optimize-css-assets-webpack-plugin": "^5.0.0",
     "postcss-loader": "^2.1.5",
@@ -126,8 +126,8 @@
     "prop-types": "^15.5.10",
     "raf": "^3.4.0",
     "raw-loader": "^0.5.1",
-    "react": "^16.4.0",
-    "react-dom": "^16.4.0",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
     "react-hot-loader": "^4.3.11",
     "react-router-dom": "^4.2.2",
     "react-test-renderer": "^16.4.2",

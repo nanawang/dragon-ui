@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-export type themeType = 'default' | 'info' | 'success' | 'warning' | 'error';
+export type themeType = 'default' | 'primary' | 'success' | 'warning' | 'danger';
 
 export interface ValueArray {
   key: any;
@@ -9,6 +9,7 @@ export interface ValueArray {
 
 export default interface Props {
   search?: boolean;
+  remoteSearch?: boolean;
   active?: boolean;
   placeholder?: string;
   searchValue?: string | null;

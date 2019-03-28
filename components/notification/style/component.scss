@@ -1,23 +1,23 @@
-.ui-notification {
-  width: 330px;
+@include b(notification) {
+  width: 350px;
   padding: 16px;
   box-sizing: border-box;
-  border-radius:  $base-radius-xs;
+  border-radius: $base-radius-xs;
   position: fixed;
   right: 16px;
   background-color: $base-btn-info-color;
   box-shadow: $box-shadow-base;
   transition: opacity 0.3s, transform .3s, right .3s, top 0.4s;
   overflow: hidden;
-  animation: notification-in .3s;
 
-  .ui-notification-wrap {
+  @include e(content) {
     margin-left: 0;
+
     &.has-icon {
       margin-left: 55px;
     }
 
-    .ui-notification-close {
+    @include e(close) {
       position: absolute;
       z-index: 1000;
       width: 16px;
@@ -29,28 +29,42 @@
       }
     }
 
-    .ui-notification-title {
+    @include e(title) {
+      padding-right: 24px;
       font-weight: normal;
       font-size: $base-fontSize-lg;
       color: #1f2d3d;
       margin: 0;
     }
 
-    .ui-notification-content {
+    @include e(custom-content) {
       font-size: $base-fontSize;
       line-height: 21px;
-      margin: 10px 0 0 0;
+      margin: 10px 0 0;
       color: #8391a5;
       text-align: justify;
     }
 
-    .ui-notification-icon {
+    @include e(icon) {
       position: absolute;
       left: 20px;
       top: 50%;
       transform: translateY(-50%);
       font-size: 42px;
     }
+
+    @include e(action-area) {
+      float: right;
+      margin-top: 16px;
+    }
+  }
+
+  &.notification-in {
+    animation-name: notification-in;
+  }
+
+  &.notification-out {
+    animation-name: notification-out;
   }
 }
 
@@ -65,9 +79,8 @@
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }
 }
-
-

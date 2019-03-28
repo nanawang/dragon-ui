@@ -39,4 +39,5 @@ export { default as Tree } from './tree';
 export { default as Transfer } from './transfer';
 export { default as Avatar } from './avatar';
 export { default as Cascader } from './cascader';
-
+export { default as Transition } from './transition';
+export { Col, Row } from './grid';

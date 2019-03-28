@@ -81,7 +81,7 @@ class DatePicker extends Component<PropsType, any> {
       if (Format.inrange(value, format)) {
         this.onDateChange(value, false);
       } else {
-        this.props.onInputInvalidDate(value);
+        this.props.onInputInvalidDate!(value);
       }
     }
     this.setState({
@@ -183,7 +183,7 @@ class DatePicker extends Component<PropsType, any> {
           >
             <span className={textCls}>
               {
-                allowInput && !showTime ?
+                allowInput && !disabled && !showTime ?
                 <Input
                   onChange={this.onInputDateValue}
                   value={value}

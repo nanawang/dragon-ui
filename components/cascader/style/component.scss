@@ -118,6 +118,7 @@ $menuItem-disabled-color: #333;
     &-loading-icon {
       position: absolute;
       right: 5px;
+
       &:after {
         position: absolute;
         font-size: 12px;
@@ -137,7 +138,6 @@ $menuItem-disabled-color: #333;
 }
 
 .ui-dropdown {
-
   .ui-cascader-notfound {
     display: block;
     padding: 8px;

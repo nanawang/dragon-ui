@@ -11,7 +11,7 @@
     this.state = {
       initialValue: [
         {
-          id: '1',
+          id: '6',
           name: '张三',
           dept: '直营部',
           age: 46,
@@ -91,7 +91,8 @@
 | keyOfItem          |  选项的索引        | string        |   -            |    ' '   |
 | displayNameOfItem  |  选项的显示名称     | string        |   -            |    ' '   |
 | radius             |  是否圆角          | boolean       |   -            |   false |
-| disabled           |  是否只读          | boolean       |   -            |  false  |
+| disabled  | 禁用    | -   | -  | -   |
+| isDisabled  | 是否禁用    | boolean   | true, false   | false   |
 
 
 ### Events
