@@ -290,7 +290,6 @@ class Select extends Component<PropsType, StateProps> {
       locale,
       remoteSearch,
     } = props;
-    console.log('locale!.placeholder111', locale);
 
     const disabled = 'disabled' in props;
     const radius = 'radius' in props;
