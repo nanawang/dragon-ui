@@ -32,11 +32,35 @@ class Tree extends Component<PropsType, StateType> {
   };
 
   componentWillMount() {
-    this.initTreeNodes();
+    this.initTreeNodes(this.props);
   }
 
-  initTreeNodes = (): void => {
-    const { treeData = [], checkedKeys, expandedKeys, defaultExpandAll, children } = this.props;
+  componentWillReceiveProps(nextProps) {
+    const { treeData, checkedKeys, expandedKeys } = nextProps;
+    if ('treeData' in nextProps && treeData !== this.props.treeData) {
+      this.initTreeNodes(nextProps);
+      return false;
+    }
+
+    if (checkedKeys && checkedKeys !== this.props.checkedKeys) {
+      const {
+        checkedKeys: _checkedKeys, halfCheckedKeys,
+      } = conductCheck(checkedKeys, true, this.state.treeData);
+      this.setState({
+        checkedKeys: _checkedKeys,
+        halfCheckedKeys,
+        treeData: this.state.treeData,
+      });
+      return;
+    }
+    if (expandedKeys && expandedKeys !== this.props.expandedKeys) {
+      const expandedKeysNew = conductExpandParent(expandedKeys, this.state.treeData);
+      this.setState({ expandedKeys: expandedKeysNew });
+    }
+  }
+
+  initTreeNodes = (props): void => {
+    const { treeData = [], checkedKeys, expandedKeys, defaultExpandAll, children } = props;
     let newState = {
       treeData: [] as object[],
       halfCheckedKeys: [] as string[],
@@ -59,11 +83,11 @@ class Tree extends Component<PropsType, StateType> {
     // 初始化checkedKeys，更新treeData
     if (checkedKeys && checkedKeys.length > 0) {
       const {
-        checkedKeys: finalCheckedKeys, halfCheckedKeys: finalHalfCheckedKeys, treeData: finaltreeDataAfter,
+        checkedKeys: finalCheckedKeys, halfCheckedKeys: finalHalfCheckedKeys,
       } = conductCheck(checkedKeys, true, newState.treeData);
       newState.checkedKeys = finalCheckedKeys;
       newState.halfCheckedKeys = finalHalfCheckedKeys;
-      newState.treeData = finaltreeDataAfter;
+      newState.treeData = newState.treeData;
     }
 
     /*
@@ -82,10 +106,10 @@ class Tree extends Component<PropsType, StateType> {
   onNodeCheck = (node, targetChecked, event: MouseEvent) => {
     const { onCheck } = this.props;
     const { keys } = node.props;
-    const { treeData: originalTreeData } = this.state;
+    const { treeData } = this.state;
     const { checkedKeys: originalCheckedKeys, halfCheckedKeys: originHalfCheckedKeys } = this.state;
 
-    const { checkedKeys, halfCheckedKeys, treeData } = conductCheck([keys], targetChecked, originalTreeData, {
+    const { checkedKeys, halfCheckedKeys } = conductCheck([keys], targetChecked, treeData, {
       checkedKeys: originalCheckedKeys, halfCheckedKeys: originHalfCheckedKeys,
     });
     const checkedMap = { checkedKeys, halfCheckedKeys };

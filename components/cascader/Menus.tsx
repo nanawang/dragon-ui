@@ -1,0 +1,120 @@
+import * as React from 'react';
+import classnames from 'classnames';
+import { MenusProps } from './PropsType';
+import { arrayTreeFilter } from './utils';
+import Icon from '../icon';
+
+interface StateProps {
+  activeValue?: string[];
+  value?: string[];
+  popupVisible: boolean;
+}
+
+class Menus extends React.Component<MenusProps, StateProps> {
+  static defaultProps = {
+    value: [],
+    activeValue: [],
+    fieldNames: [],
+    prefixCls: 'ui-cascader',
+    visible: false,
+    expandTrigger: 'click',
+  };
+
+  expandIcon = (<Icon type="arrow-right" className={`${this.props.prefixCls}-menu-item-expand-icon`} />);
+  loadingIcon = (<Icon type="loading" className={`${this.props.prefixCls}-menu-item-loading-icon`} />);
+
+  getFieldName = (name) => {
+    const { fieldNames, defaultFieldNames } = this.props;
+    return fieldNames![name] || defaultFieldNames[name];
+  }
+
+  getActiveOptions = () => {
+    const activeValue = this.props.activeValue;
+    const options = this.props.options;
+    return arrayTreeFilter(options,
+      (o, level) => o[this.getFieldName('value')] === activeValue![level],
+      { childrenKeyName: this.getFieldName('children') });
+  }
+
+  getShowOptions = () => {
+    const { options } = this.props;
+    const result = this.getActiveOptions()
+      .map(activeOption => activeOption[this.getFieldName('children')])
+      .filter(activeOption => !!activeOption);
+    result.unshift(options);
+    return result;
+  }
+
+  isActiveOption = (option, menuIndex) => {
+    const { activeValue } = this.props;
+    return activeValue![menuIndex] === option[this.getFieldName('value')];
+  }
+
+  getOption = (option, menuIndex) => {
+    const { prefixCls, expandTrigger } = this.props;
+    const { loading, disabled, isLeaf } = option;
+    const [children, value, label] = [
+      option[this.getFieldName('children')],
+      option[this.getFieldName('value')],
+      option[this.getFieldName('label')],
+    ];
+    const hasChildren = children && children.length > 0 || isLeaf;
+    const isActive = this.isActiveOption(option, menuIndex);
+    const menuItemCls = classnames({
+      [`${prefixCls}-menu-item`]: true,
+      [`${prefixCls}-menu-item-active`]: isActive,
+      [`${prefixCls}-menu-item-expand`]: hasChildren,
+      [`${prefixCls}-menu-item-disabled`]: disabled,
+      [`${prefixCls}-menu-item-loading`]: loading,
+    });
+    const loadingIcon = !!loading ? this.loadingIcon : null;
+    let expandIcon: any = null;
+    if (hasChildren || isLeaf === false) {
+      expandIcon = this.expandIcon;
+    }
+
+    const onSelect = (e) => {
+      if (!disabled) {
+        this.props.onSelect(option, menuIndex, e);
+      }
+    };
+    let expandProps: any = {
+      onClick: onSelect,
+    };
+    if (expandTrigger === 'hover' && hasChildren) {
+      expandProps = {
+        ...expandProps,
+        onMouseEnter: onSelect,
+      };
+    }
+    return (
+      <li
+        className={menuItemCls}
+        key={value}
+        title={label}
+        {...expandProps}
+      >
+        {label}
+        {expandIcon}
+        {loadingIcon}
+      </li>
+    );
+  }
+
+  render() {
+    const { prefixCls, dropdownMenuColumnStyle } = this.props;
+    const menus = this.getShowOptions().map(
+      (options, menuIndex) => (
+        <ul className={`${prefixCls}-menu`} key={menuIndex} style={dropdownMenuColumnStyle}>
+          {options.map(option => this.getOption(option, menuIndex))}
+        </ul>
+      ));
+    return (
+      <div className={`${prefixCls}-menus`}>
+        {menus}
+      </div>
+    );
+  }
+}
+
+export default Menus;

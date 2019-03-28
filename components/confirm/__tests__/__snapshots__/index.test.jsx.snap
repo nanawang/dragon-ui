@@ -1,174 +1,272 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Confirm renders basic Confirm correctly 1`] = `
-<LocaleReceiver
+<ForwardRef(forwardRef)
   message="确认删除吗？"
   onCancel={[Function]}
   onOk={[Function]}
   visible={true}
 >
-  <ConfirmExtension
-    locale={
-      Object {
-        "cancel": "取消",
-        "confirm": "确定",
-      }
-    }
-    localeCode="zh-cn"
+  <LocaleReceiver
+    forwardedRef={null}
     message="确认删除吗？"
     onCancel={[Function]}
     onOk={[Function]}
-    prefixCls="ui-confirm"
     visible={true}
-    width={270}
   >
-    <Modal
-      animationDuration={300}
-      animationType="zoom"
-      isRadius={false}
-      isRound={false}
-      minWidth={270}
-      onMaskClick={[Function]}
-      prefixCls="ui-modal"
+    <ConfirmExtension
+      cancelText="取消"
+      locale={
+        Object {
+          "cancel": "取消",
+          "confirm": "确定",
+        }
+      }
+      localeCode="zh-cn"
+      message="确认删除吗？"
+      okText="确定"
+      onCancel={[Function]}
+      onOk={[Function]}
+      prefixCls="ui-confirm"
       visible={true}
       width={270}
     >
-      <div
-        className="ui-modal fade-enter"
-        onClick={[Function]}
-        style={
-          Object {
-            "MozAnimationDuration": "300ms",
-            "OAnimationDuration": "300ms",
-            "WebkitAnimationDuration": "300ms",
-            "animationDuration": "300ms",
-            "msAnimationDuration": "300ms",
-            "position": "fixed",
-          }
-        }
+      <Modal
+        animationDuration={300}
+        animationType="zoom"
+        isRadius={false}
+        isRound={false}
+        minWidth={270}
+        onKeyPress={[Function]}
+        onMaskClick={[Function]}
+        prefixCls="ui-modal"
+        visible={true}
+        width={270}
       >
-        <div
-          className="ui-modal-wrapper"
+        <Portal
+          containerInfo={
+            <div>
+              <div
+                class="ui-modal fade-enter"
+                style="position: fixed;"
+              >
+                <div
+                  class="ui-modal-wrapper"
+                >
+                  <div
+                    class="ui-modal-dialog zoom-enter"
+                    style="width: 270px; min-width: 270px;"
+                    tabindex="-1"
+                  >
+                    <div
+                      class="ui-modal-header"
+                      style="display: none;"
+                    >
+                      <div
+                        class="ui-modal-title"
+                      />
+                      <div
+                        class="ui-modal-close"
+                      >
+                        <i
+                          class="za-icon za-icon-wrong theme-default"
+                        />
+                      </div>
+                    </div>
+                    <div
+                      class="ui-modal-body"
+                      style="height: auto;"
+                    >
+                      <div
+                        class="ui-confirm"
+                      >
+                        <i
+                          class="za-icon za-icon-question-round theme-default"
+                        />
+                        <span>
+                          确认删除吗？
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      class="ui-modal-footer"
+                    >
+                      <button
+                        class="is-radius za-button za-button--default"
+                        type="button"
+                      >
+                        取消
+                      </button>
+                      <button
+                        class="is-radius za-button za-button--primary"
+                        type="button"
+                      >
+                        确定
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
         >
           <div
-            className="ui-modal-dialog zoom-enter"
+            className="ui-modal fade-enter"
             onClick={[Function]}
             style={
               Object {
-                "MozAnimationDuration": "300ms",
-                "OAnimationDuration": "300ms",
                 "WebkitAnimationDuration": "300ms",
-                "animationDuration": "300ms",
-                "minWidth": 270,
-                "msAnimationDuration": "300ms",
-                "width": 270,
+                "position": "fixed",
               }
             }
           >
-            <ModalBody
-              height="auto"
-              prefixCls="ui-modal"
-              style={Object {}}
+            <div
+              className="ui-modal-wrapper"
             >
               <div
-                className="ui-modal-body"
+                className="ui-modal-dialog zoom-enter"
+                onClick={[Function]}
+                onKeyDown={[Function]}
+                onKeyPress={[Function]}
                 style={
                   Object {
-                    "height": "auto",
+                    "WebkitAnimationDuration": "300ms",
+                    "minWidth": 270,
+                    "width": 270,
                   }
                 }
+                tabIndex={-1}
               >
-                <div
-                  className="ui-confirm"
+                <ModalHeader
+                  onClose={[Function]}
+                  prefixCls="ui-modal"
+                  style={
+                    Object {
+                      "display": "none",
+                    }
+                  }
+                  title=""
                 >
-                  <Icon
-                    className=""
-                    onClick={[Function]}
-                    prefixCls="ui-icon"
-                    style={Object {}}
-                    theme="default"
-                    type="question-round"
+                  <div
+                    className="ui-modal-header"
+                    style={
+                      Object {
+                        "display": "none",
+                      }
+                    }
                   >
-                    <i
-                      className="ui-icon ui-icon-question-round theme-default"
-                      onClick={[Function]}
-                      style={Object {}}
+                    <div
+                      className="ui-modal-title"
                     />
-                  </Icon>
-                  <span>
-                    确认删除吗？
-                  </span>
-                </div>
-              </div>
-            </ModalBody>
-            <ModalFooter
-              prefixCls="ui-modal"
-              style={Object {}}
-            >
-              <div
-                className="ui-modal-footer"
-                style={Object {}}
-              >
-                <Button
-                  className={null}
-                  isActive={false}
-                  isBlock={false}
-                  isCircle={false}
-                  isDisabled={false}
-                  isFocus={false}
-                  isLoading={false}
-                  isRadius={false}
-                  isRound={false}
-                  onClick={[Function]}
-                  prefixCls="ui-button"
-                  size={null}
+                    <div
+                      className="ui-modal-close"
+                      onClick={[Function]}
+                    >
+                      <Icon
+                        className=""
+                        onClick={[Function]}
+                        prefixCls="za-icon"
+                        style={Object {}}
+                        theme="default"
+                        type="wrong"
+                      >
+                        <i
+                          className="za-icon za-icon-wrong theme-default"
+                          onClick={[Function]}
+                          style={Object {}}
+                        />
+                      </Icon>
+                    </div>
+                  </div>
+                </ModalHeader>
+                <ModalBody
+                  height="auto"
+                  prefixCls="ui-modal"
                   style={Object {}}
-                  theme="default"
-                  type="button"
                 >
-                  <button
-                    className="ui-button theme-default"
-                    disabled={false}
-                    onClick={[Function]}
-                    style={Object {}}
-                    type="button"
+                  <div
+                    className="ui-modal-body"
+                    style={
+                      Object {
+                        "height": "auto",
+                      }
+                    }
                   >
-                    取消
-                  </button>
-                </Button>
-                <Button
-                  className={null}
-                  isActive={false}
-                  isBlock={false}
-                  isCircle={false}
-                  isDisabled={false}
-                  isFocus={false}
-                  isLoading={false}
-                  isRadius={false}
-                  isRound={false}
-                  onClick={[Function]}
-                  prefixCls="ui-button"
-                  size={null}
+                    <div
+                      className="ui-confirm"
+                    >
+                      <Icon
+                        className=""
+                        onClick={[Function]}
+                        prefixCls="za-icon"
+                        style={Object {}}
+                        theme="default"
+                        type="question-round"
+                      >
+                        <i
+                          className="za-icon za-icon-question-round theme-default"
+                          onClick={[Function]}
+                          style={Object {}}
+                        />
+                      </Icon>
+                      <span>
+                        确认删除吗？
+                      </span>
+                    </div>
+                  </div>
+                </ModalBody>
+                <ModalFooter
+                  prefixCls="ui-modal"
                   style={Object {}}
-                  theme="success"
-                  type="button"
                 >
-                  <button
-                    className="ui-button theme-success"
-                    disabled={false}
-                    onClick={[Function]}
+                  <div
+                    className="ui-modal-footer"
                     style={Object {}}
-                    type="button"
                   >
-                    确定
-                  </button>
-                </Button>
+                    <Button
+                      block={false}
+                      ghost={false}
+                      htmlType="button"
+                      onClick={[Function]}
+                      prefixCls="za-button"
+                      shape="radius"
+                      size={null}
+                      theme="default"
+                    >
+                      <button
+                        className="is-radius za-button za-button--default"
+                        onClick={[Function]}
+                        type="button"
+                      >
+                        取消
+                      </button>
+                    </Button>
+                    <Button
+                      block={false}
+                      ghost={false}
+                      htmlType="button"
+                      onClick={[Function]}
+                      prefixCls="za-button"
+                      shape="radius"
+                      size={null}
+                      theme="primary"
+                    >
+                      <button
+                        className="is-radius za-button za-button--primary"
+                        onClick={[Function]}
+                        type="button"
+                      >
+                        确定
+                      </button>
+                    </Button>
+                  </div>
+                </ModalFooter>
               </div>
-            </ModalFooter>
+            </div>
           </div>
-        </div>
-      </div>
-    </Modal>
-  </ConfirmExtension>
-</LocaleReceiver>
+        </Portal>
+      </Modal>
+    </ConfirmExtension>
+  </LocaleReceiver>
+</ForwardRef(forwardRef)>
 `;

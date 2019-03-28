@@ -1,12 +1,29 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import rafObj from '../utils/rAF';
 import Notification from './Notification';
 
-const className: string = '.ui-notification';
-const NOTIFICATION_GAP = 16;
+interface Instance {
+  key: string;
+  [key: string]: any;
+}
 
-export default function NotificationInstance (props: any, type: string) {
+interface NotificationInstanceFunc {
+  close?: object;
+  remove?: object;
+  [key: string]: any;
+}
+
+const NOTIFICATION_GAP = 16;
+const notificationInstances: Instance[] = [];
+const now = Date.now();
+let seed = 0;
+
+function getNotificationKey() {
+  return `notification-${now}-${seed++}`;
+}
+
+export default function NotificationInstance (props?: any, theme?: string) {
+  const className: string = props.isMessage ? '.za-message' : '.za-notification';
   const div = document.createElement('div');
 
   document.body.appendChild(div);
@@ -17,42 +34,54 @@ export default function NotificationInstance (props: any, type: string) {
     };
   }
 
-  if (type) {
-    props.type = type;
+  if (theme) {
+    props.theme = theme;
   }
 
+  const key = props.key;
   const instances = document.querySelectorAll(className);
-
   const lastInstance: any = instances[instances.length - 1];
 
   props.top = (lastInstance ? (parseInt(lastInstance.style.top, 10) +
     lastInstance.offsetHeight) : 0) + NOTIFICATION_GAP;
 
-  const element = React.createElement(Notification, {
-    ...props,
-    willUnMount (lastHeight, lastTop) {
+  function willUnMount (lastHeight, lastTop) {
+    setTimeout(() => {
       ReactDOM.unmountComponentAtNode(div);
       document.body.removeChild(div);
+    });
 
-      rafObj.rAF(() => {
-        const instancesDom = document.querySelectorAll(className);
+    const instancesDom = document.querySelectorAll(className);
 
-        Array.from(instancesDom).forEach((instance: any) => {
-          const instanceTop = parseInt(instance.style.top, 10);
-          if (instanceTop > lastTop) {
-            instance.style.top = `${instanceTop - lastHeight - 16}px`;
-          }
-        });
-      });
-    },
-  });
+    Array.from(instancesDom).forEach((instance: any) => {
+      const instanceTop = parseInt(instance.style.top, 10);
+      if (instanceTop > lastTop) {
+        instance.style.top = `${instanceTop - lastHeight - 16}px`;
+      }
+    });
+  }
 
-  ReactDOM.render(element, div);
+  function ref (instance: Instance) {
+    if (instance) {
+      instance.key = instance.key || key || getNotificationKey();
+      notificationInstances.push(instance);
+    }
+  }
+
+  function remove (key) {
+    notificationInstances.forEach((instance: Instance) => {
+      if (instance.key === key) {
+        instance.onClose();
+      }
+    });
+  }
+
+  ReactDOM.render(<Notification {...props} willUnMount={willUnMount} ref={ref} />, div);
+  (NotificationInstance as NotificationInstanceFunc).remove = remove;
 }
 
-// 注册单例方法
-['info', 'error', 'success', 'warning'].forEach(type => {
-  NotificationInstance[type] = (options: object = {}) => {
-    return NotificationInstance(options, type);
+['primary', 'danger', 'success', 'warning', 'loading'].forEach(theme => {
+  NotificationInstance[theme] = (options: object = {}) => {
+    NotificationInstance(options, theme);
   };
 });

@@ -121,7 +121,7 @@ function getNodeFromKey(keys, treeData: Array<object>) {
  * @param isChecked {boolean} 目标变化状态（是否选中）
  * @param treeData {array} 整个树结点数组
  * @param originCheckedStateMap 原有所有选中结点的keys数组(包含全选中、未全选状态的节点数组)
- * @returns {checkedKeys, halfCheckedKeys, treeData}
+ * @returns {checkedKeys, halfCheckedKeys}
  */
 export function conductCheck(
   keysList,
@@ -131,7 +131,7 @@ export function conductCheck(
     checkedKeys: Array<string>,
     halfCheckedKeys: Array<string>,
   },
-): { checkedKeys: Array<string>, halfCheckedKeys: Array<string>, treeData: Array<object> } {
+): { checkedKeys: Array<string>, halfCheckedKeys: Array<string> } {
   const checkedKeys: object = {};
   const halfCheckedKeys: object = {};
   const finalCheckedKeysList: Array<string> = [];
@@ -256,7 +256,6 @@ export function conductCheck(
   return {
     checkedKeys: finalCheckedKeysList,
     halfCheckedKeys: finalHalfCheckedKeysList,
-    treeData,
   };
 }
 

@@ -113,8 +113,7 @@ describe('Pagination', () => {
     wrapper.find('.ui-pagination-item-jump-next').simulate('click');
 
     expect(onChange).toHaveBeenCalledWith(6);
-  });
-
+  })
   it('behaves correctly when change page with jumper', () => {
     const onChange = jest.fn();
     const wrapper = mount(
