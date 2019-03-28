@@ -4,26 +4,11 @@ import Cascader from '../../../components/cascader';
 import '../../../components/cascader/style';
 import '../../../components/dropdown/style';
 import '../../../components/tag-input/style';
-import { CascaderOptionType } from '../../../components/cascader/PropsType';
 
 const options = [{
   value: 'zhinan',
   label: '指南指南',
-  children: [{
-    value: 'shejiyuanze',
-    label: '设计原则',
-    isLeaf: false,
-  }, {
-    value: 'daohang',
-    label: '导航',
-    children: [{
-      value: 'cexiangdaohang',
-      label: '侧向导航',
-    }, {
-      value: 'dingbudaohang',
-      label: '顶部导航',
-    }],
-  }],
+  isLeaf: false,
 }, {
   value: 'zujian',
   label: '组件',
@@ -61,7 +46,7 @@ const options = [{
     }, {
       value: 'time-picker',
       label: 'TimePicker 时间选择器',
-    },
+    }],
   }],
 }, {
   value: 'ziyuan',
@@ -95,8 +80,8 @@ export default class Test extends React.Component {
     console.log(value);
   };
 
-  loadData = (targetOption, activeValue, activeOptions) => {
-    console.log(targetOption, activeValue, activeOptions);
+  loadData = (targetOption, selectedValue, selectedOptions) => {
+    console.log(targetOption, selectedValue, selectedOptions);
     targetOption.loading = true;
     // load options lazily
     setTimeout(() => {
@@ -132,8 +117,8 @@ export default class Test extends React.Component {
     }
 
     return (
-      <Cascader style={{ width: 500 }} loadData={this.loadData} changeOnSelect expandTrigger="hover" className="demo-picker" options={this.state.options} onChange={this.onChange} isSearch>
-        <a href="#">Change city</a>
+      <Cascader style={{ width: 500 }} loadData={this.loadData} expandTrigger="hover" className="demo-picker" options={this.state.options} onChange={this.onChange} isSearch>
+        <a href="javascript:;">选择地区</a>
       </Cascader>
     );
   }

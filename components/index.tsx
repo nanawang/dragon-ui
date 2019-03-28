@@ -38,3 +38,5 @@ export { default as LocaleProvider } from './locale';
 export { default as Tree } from './tree';
 export { default as Transfer } from './transfer';
 export { default as Avatar } from './avatar';
+export { default as Cascader } from './cascader';
+

@@ -25,6 +25,7 @@ class Cascader extends React.Component<propsType, StateProps> {
     isDisabled: false,
     changeOnSelect: false,
     popupPlacement: 'bottomLeft',
+    style: {},
   };
   defaultFieldNames = { label: 'label', value: 'value', children: 'children' };
   cachedOptions: CascaderOptionType[];
@@ -73,7 +74,7 @@ class Cascader extends React.Component<propsType, StateProps> {
         total = total.concat(this.flattenOptions(children, changeOnSelect, fieldNames, path));
       }
       return total;
-    }, []);
+    }, [] as CascaderOptionType[][]);
   }
 
   getActiveOptions = (values) => {
@@ -89,8 +90,8 @@ class Cascader extends React.Component<propsType, StateProps> {
     return fieldNames![name] || this.defaultFieldNames[name];
   }
 
-  onSearchValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchValue = e.target.textContent;
+  onSearchValueChange = (e) => {
+    const searchValue = (e.target as HTMLDivElement).textContent || '';
     this.setState({ searchValue });
   }
 
@@ -105,7 +106,7 @@ class Cascader extends React.Component<propsType, StateProps> {
       (o: CascaderOptionType, level: number) => o[names.value] === value[level],
       { childrenKeyName: names.children },
     );
-    const label = selectedOptions.map(o => o[names.label]);
+    const label = (selectedOptions || []).map(o => o[names.label]);
     return displayRender(label, selectedOptions);
   }
 
@@ -116,11 +117,18 @@ class Cascader extends React.Component<propsType, StateProps> {
       value: activeValue,
       activeValue,
     });
-    onChange(options.map(o => o[this.getFieldName('value')]), options);
+    if (typeof onChange !== 'undefined') {
+      onChange(options.map(o => o[this.getFieldName('value')]), options);
+    }
     this.setPopupVisible(popupVisible);
   }
 
   onMenuSelect = (targetOption, menuIndex, e) => {
+    // 如果当前是点击的搜索出来的菜单，则直接变更
+    if (targetOption.isFiltered) {
+      this.handleValueChange(targetOption.path, { popupVisible: false, activeValue: targetOption.value  });
+      return;
+    }
     const { changeOnSelect, expandTrigger, loadData } = this.props;
     let { activeValue } = this.state;
     activeValue = activeValue.slice(0, menuIndex + 1);
@@ -187,7 +195,7 @@ class Cascader extends React.Component<propsType, StateProps> {
   }
 
   getFilteredOptions = () => {
-    const { fieldNames: fieldNamesProps, prefixCls, locale } = this.props;
+    const { fieldNames: fieldNamesProps, prefixCls } = this.props;
     const { searchValue } = this.state;
     const fieldNames = getFieldNames(fieldNamesProps);
     const filteredPathOptions = this.flattenedOptions.filter(
@@ -199,6 +207,8 @@ class Cascader extends React.Component<propsType, StateProps> {
           [fieldNames.label]: filterOptionRender(searchValue, path, fieldNames, prefixCls),
           [fieldNames.value]: path.map((o: CascaderOptionType) => o[fieldNames.value]),
           disabled: path.some((o: CascaderOptionType) => !!o.disabled),
+          path,
+          isFiltered: true,
         };
       });
     }
@@ -239,7 +249,7 @@ class Cascader extends React.Component<propsType, StateProps> {
     } else {
       this.cachedOptions = options;
     }
-    const notFoundStyle = { width: style.width || 108 };
+    const notFoundStyle = { width: style.width || 300 };
     const menus = (options && options.length > 0)
       ? (<Menus
         value={value}

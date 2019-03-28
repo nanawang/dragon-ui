@@ -23,6 +23,7 @@ export default {
       TimePicker: '../pages/timepicker',
       Upload: '../pages/upload',
       Form: '../pages/form',
+      Cascader: '../pages/cascader',
     },
     Data: {
       Table: '../pages/table',

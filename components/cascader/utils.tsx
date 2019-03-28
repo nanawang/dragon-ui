@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { FieldNamesType, CascaderOptionType } from './PropsType';
 
-export function getFieldNames(fieldNames: FieldNamesType = {}) {
+export function getFieldNames(fieldNames: FieldNamesType) {
   const names = {
     children: fieldNames.children || 'children',
     label: fieldNames.label || 'label',
@@ -14,7 +14,7 @@ export const arrayTreeFilter = (data, filterFn, options) => {
   options = options || {};
   options.childrenKeyName = options.childrenKeyName || 'children';
   let children = data || [];
-  let result = [];
+  let result: CascaderOptionType[] = [];
   let level = 0;
   let foundItem;
   do {
@@ -29,13 +29,13 @@ export const arrayTreeFilter = (data, filterFn, options) => {
     level += 1;
   } while (children.length > 0);
   return result;
-}
+};
 
 export const defaultDisplayRender = (label: string[]) => label.join(' / ');
 
 export const hasFilterOption = (inputValue: string, path: CascaderOptionType[], fieldNames: FieldNamesType) => {
   return path.some(option => (option[fieldNames.label] as string).indexOf(inputValue) > -1);
-}
+};
 
 export const filterOptionRender = (
   searchValue: string, path: CascaderOptionType[],
@@ -52,4 +52,4 @@ export const filterOptionRender = (
     }
     return index === 0 ? labelWithHighlight : [' / ', labelWithHighlight];
   });
-}
+};

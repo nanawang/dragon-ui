@@ -14,12 +14,13 @@ export interface CascaderOptionType {
   label?: ReactNode;
   disabled?: boolean;
   isLeaf?: boolean;
+  isFiltered?: boolean;
   title?: string;
   children?: Array<CascaderOptionType>;
 }
 
 interface BasicPropsType {
-  locale?: { [propName: string]: any };
+  locale: { [propName: string]: any };
   prefixCls: string;
   /** 指定选中项 */
   value?: string[];
@@ -37,30 +38,33 @@ interface BasicPropsType {
   /** 自定义浮层类名 */
   popupClassName?: string;
   /** 自定义样式 */
-  style?: React.CSSProperties;
+  style: React.CSSProperties;
   /** 是否支持清除*/
   allowClear?: boolean;
   /** 浮层对齐方式：`bottomLeft` `bottomRight` `topLeft` `topRight` */
   popupPlacement?: string;
   /** 菜单的展开方式，可选 'click' 和 'hover' */
   expandTrigger?: expandTrigger;
+  /** 自定义 options中label，name以及children的字段名称 */
+  fieldNames: FieldNamesType;
+  /** 为true表示选择后即改变，可选择父级 */
+  changeOnSelect: boolean;
+  /** 控制浮层显隐 */
+  popupVisible?: boolean;
+  /** 是否支持搜索 **/
+  isSearch?: boolean;
   /** 选择完成后的回调 */
   onChange?: (value: string[], selectedOptions?: CascaderOptionType[]) => void;
   /** 选择后展示的渲染函数 */
   displayRender?: (label: string[], selectedOptions?: CascaderOptionType[]) => React.ReactNode;
   /** 浮层显示or隐藏的回调 */
   onPopupVisibleChange?: (popupVisible: boolean) => void;
-  fieldNames: FieldNamesType;
-  /** 为true表示选择后即改变，可选择父级 */
-  changeOnSelect: boolean;
+  loadData?: (
+    targetOption: CascaderOptionType,
+    selectedValue: string[],
+    selectedOptions?: CascaderOptionType[],
+  ) => void;
 
-  popupVisible?: boolean;
-  /** 是否支持搜索 **/
-  isSearch?: boolean;
-  // 后续完善属性
-  loadData?: (targetOption: CascaderOptionType, activeValue: string[], activeOptions?: CascaderOptionType[],) => void;
-
-  // size?: size;
   getPopupContainer?(): HTMLElement;
 }
 
