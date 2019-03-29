@@ -1,0 +1,147 @@
+$cascaderPrefixCls: ui-cascader;
+$item-hover-bg: #e6f7ff;
+$hover-color: #1890ff;
+$active-color: #1890ff;
+$disabled-color: #f3f5f7;
+$background-color-base: #d5f1fd;
+$highlight-color: #f5222d;
+$menuItem-disabled-backgroundColor: #e6e6e6;
+$menuItem-disabled-color: #333;
+
+.#{$cascaderPrefixCls} {
+  .tag-input-box {
+    width: 300px;
+  }
+
+  &-picker {
+    position: relative;
+
+    &-clear {
+      position: absolute;
+      right: $base-padding;
+      z-index: 2;
+      background: #fff;
+      top: 50%;
+      color: $base-btn-default-bg;
+      width: 16px;
+      height: 16px;
+      margin-top: -6px;
+      line-height: 12px;
+      cursor: pointer;
+      transition: color 0.3s ease, opacity 0.15s ease;
+      opacity: 0;
+
+      &:hover {
+        color: darken($base-btn-default-bg, 10%);
+      }
+    }
+
+    &:hover &-clear {
+      opacity: 1;
+    }
+  }
+
+  &-menus {
+    font-size: $base-fontSize;
+    background: $menu-default-bg-color;
+    box-shadow: $box-shadow-base;
+    white-space: nowrap;
+
+    ul,
+    ol {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    &-empty,
+    &-hidden {
+      display: none;
+    }
+  }
+
+  &-menu {
+    display: inline-block;
+    vertical-align: top;
+    min-width: 111px;
+    height: 250px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-right: 1px solid $base-theme-default;
+    overflow: auto;
+
+    &:last-child {
+      border-right-color: transparent;
+      margin-right: -1px;
+    }
+  }
+
+  &-menu-item {
+    position: relative;
+    padding: $base-padding;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s;
+
+    &:hover:not(&-disabled) {
+      background: $item-hover-bg;
+      color: $hover-color;
+    }
+
+    &-disabled {
+      cursor: not-allowed;
+      color: $menuItem-disabled-color;
+      background: $menuItem-disabled-backgroundColor;
+      opacity: .65;
+    }
+
+    &-expand {
+      padding-right: 24px;
+    }
+
+    &-active:not(&-disabled) {
+      &,
+      &:hover {
+        background: $background-color-base;
+        color: $active-color;
+      }
+    }
+
+    &-loading {
+      .#{$cascaderPrefixCls}-menu-item-expand-icon {
+        opacity: 0;
+      }
+    }
+
+    &-expand-icon,
+    &-loading-icon {
+      position: absolute;
+      right: 5px;
+
+      &:after {
+        position: absolute;
+        font-size: 12px;
+        right: ($base-height - $base-fontSize) / 2;
+        margin-top: - $base-fontSize / 2;
+      }
+    }
+
+    &-loading-icon {
+      animation: rotate360 1s linear infinite;
+    }
+
+    &-keyword {
+      color: $highlight-color;
+    }
+  }
+}
+
+.ui-dropdown {
+  .ui-cascader-notfound {
+    display: block;
+    padding: 8px;
+    color: #ccc;
+  }
+}
+

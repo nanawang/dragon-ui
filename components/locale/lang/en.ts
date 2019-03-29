@@ -66,6 +66,11 @@ export default {
     placeholder: 'Select',
     searchPlaceholder: 'Input search text',
   },
+  Cascader: {
+    placeholder: 'Select',
+    noMatch: 'No matching data',
+    searchPlaceholder: 'Input search text',
+  },
   TimePicker: {
     confirm: 'Ok',
     clear: 'Clear',
