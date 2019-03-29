@@ -66,6 +66,11 @@ export default {
     placeholder: '请选择',
     searchPlaceholder: '输入关键字',
   },
+  Cascader: {
+    noMatch: '没有找到数据',
+    placeholder: '请选择',
+    searchPlaceholder: '输入关键字',
+  },
   TimePicker: {
     clear: '清除',
     confirm: '确认',
