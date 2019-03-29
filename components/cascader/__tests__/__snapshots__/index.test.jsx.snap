@@ -1,0 +1,395 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Cascader renders basic Cascader correctly 1`] = `
+<LocaleReceiver
+  forwardedRef={null}
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [
+              Object {
+                "label": "西湖区",
+                "value": "xihu",
+              },
+              Object {
+                "label": "上城区",
+                "value": "shangcheng",
+              },
+            ],
+            "label": "杭州市",
+            "value": "hangzhou",
+          },
+        ],
+        "disabled": true,
+        "label": "浙江省",
+        "value": "zhejiang",
+      },
+      Object {
+        "children": Array [
+          Object {
+            "label": "浦东新区",
+            "value": "pudong",
+          },
+          Object {
+            "label": "徐汇区",
+            "value": "xuhui",
+          },
+        ],
+        "label": "上海市",
+        "value": "shanghai",
+      },
+    ]
+  }
+  value={
+    Array [
+      "shanghai",
+      "pudong",
+    ]
+  }
+/>
+`;
+
+exports[`Cascader renders basic Cascader with props changeOnSelect correctly 1`] = `
+<LocaleReceiver
+  changeOnSelect={true}
+  expandTrigger="hover"
+  forwardedRef={null}
+  options={
+    Array [
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [
+              Object {
+                "label": "西湖区",
+                "value": "xihu",
+              },
+              Object {
+                "label": "上城区",
+                "value": "shangcheng",
+              },
+            ],
+            "label": "杭州市",
+            "value": "hangzhou",
+          },
+        ],
+        "disabled": true,
+        "label": "浙江省",
+        "value": "zhejiang",
+      },
+      Object {
+        "children": Array [
+          Object {
+            "label": "浦东新区",
+            "value": "pudong",
+          },
+          Object {
+            "label": "徐汇区",
+            "value": "xuhui",
+          },
+        ],
+        "label": "上海市",
+        "value": "shanghai",
+      },
+    ]
+  }
+/>
+`;
+
+exports[`Cascader renders basic Cascader with props children correctly 1`] = `
+<div>
+  <ForwardRef(forwardRef)
+    expandTrigger="hover"
+    options={
+      Array [
+        Object {
+          "children": Array [
+            Object {
+              "children": Array [
+                Object {
+                  "label": "西湖区",
+                  "value": "xihu",
+                },
+                Object {
+                  "label": "上城区",
+                  "value": "shangcheng",
+                },
+              ],
+              "label": "杭州市",
+              "value": "hangzhou",
+            },
+          ],
+          "disabled": true,
+          "label": "浙江省",
+          "value": "zhejiang",
+        },
+        Object {
+          "children": Array [
+            Object {
+              "label": "浦东新区",
+              "value": "pudong",
+            },
+            Object {
+              "label": "徐汇区",
+              "value": "xuhui",
+            },
+          ],
+          "label": "上海市",
+          "value": "shanghai",
+        },
+      ]
+    }
+  >
+    <a
+      href="javascript:;"
+    >
+      选择地区
+    </a>
+  </ForwardRef(forwardRef)>
+</div>
+`;
+
+exports[`Cascader renders basic Cascader with props expandTrigger correctly 1`] = `
+<LocaleReceiver
+  expandTrigger="hover"
+  forwardedRef={null}
+  options={
+    Array [
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [
+              Object {
+                "label": "西湖区",
+                "value": "xihu",
+              },
+              Object {
+                "label": "上城区",
+                "value": "shangcheng",
+              },
+            ],
+            "label": "杭州市",
+            "value": "hangzhou",
+          },
+        ],
+        "disabled": true,
+        "label": "浙江省",
+        "value": "zhejiang",
+      },
+      Object {
+        "children": Array [
+          Object {
+            "label": "浦东新区",
+            "value": "pudong",
+          },
+          Object {
+            "label": "徐汇区",
+            "value": "xuhui",
+          },
+        ],
+        "label": "上海市",
+        "value": "shanghai",
+      },
+    ]
+  }
+/>
+`;
+
+exports[`Cascader renders basic Cascader with props fieldNames correctly 1`] = `
+<LocaleReceiver
+  fieldNames={
+    Object {
+      "children": "child",
+      "label": "name",
+      "value": "code",
+    }
+  }
+  forwardedRef={null}
+  options={
+    Array [
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [
+              Object {
+                "label": "西湖区",
+                "value": "xihu",
+              },
+              Object {
+                "label": "上城区",
+                "value": "shangcheng",
+              },
+            ],
+            "label": "杭州市",
+            "value": "hangzhou",
+          },
+        ],
+        "disabled": true,
+        "label": "浙江省",
+        "value": "zhejiang",
+      },
+      Object {
+        "children": Array [
+          Object {
+            "label": "浦东新区",
+            "value": "pudong",
+          },
+          Object {
+            "label": "徐汇区",
+            "value": "xuhui",
+          },
+        ],
+        "label": "上海市",
+        "value": "shanghai",
+      },
+    ]
+  }
+/>
+`;
+
+exports[`Cascader renders basic Cascader with props isDisabled correctly 1`] = `
+<LocaleReceiver
+  forwardedRef={null}
+  isDisabled={true}
+  options={
+    Array [
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [
+              Object {
+                "label": "西湖区",
+                "value": "xihu",
+              },
+              Object {
+                "label": "上城区",
+                "value": "shangcheng",
+              },
+            ],
+            "label": "杭州市",
+            "value": "hangzhou",
+          },
+        ],
+        "disabled": true,
+        "label": "浙江省",
+        "value": "zhejiang",
+      },
+      Object {
+        "children": Array [
+          Object {
+            "label": "浦东新区",
+            "value": "pudong",
+          },
+          Object {
+            "label": "徐汇区",
+            "value": "xuhui",
+          },
+        ],
+        "label": "上海市",
+        "value": "shanghai",
+      },
+    ]
+  }
+  value={
+    Array [
+      "shanghai",
+      "pudong",
+    ]
+  }
+/>
+`;
+
+exports[`Cascader renders basic Cascader with props isSearch correctly 1`] = `
+<LocaleReceiver
+  forwardedRef={null}
+  isSearch={true}
+  options={
+    Array [
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [
+              Object {
+                "label": "西湖区",
+                "value": "xihu",
+              },
+              Object {
+                "label": "上城区",
+                "value": "shangcheng",
+              },
+            ],
+            "label": "杭州市",
+            "value": "hangzhou",
+          },
+        ],
+        "disabled": true,
+        "label": "浙江省",
+        "value": "zhejiang",
+      },
+      Object {
+        "children": Array [
+          Object {
+            "label": "浦东新区",
+            "value": "pudong",
+          },
+          Object {
+            "label": "徐汇区",
+            "value": "xuhui",
+          },
+        ],
+        "label": "上海市",
+        "value": "shanghai",
+      },
+    ]
+  }
+/>
+`;
+
+exports[`Cascader renders basic Cascader with props loadData correctly 1`] = `
+<LocaleReceiver
+  forwardedRef={null}
+  loadData={[Function]}
+  options={
+    Array [
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [
+              Object {
+                "label": "西湖区",
+                "value": "xihu",
+              },
+              Object {
+                "label": "上城区",
+                "value": "shangcheng",
+              },
+            ],
+            "label": "杭州市",
+            "value": "hangzhou",
+          },
+        ],
+        "disabled": true,
+        "label": "浙江省",
+        "value": "zhejiang",
+      },
+      Object {
+        "children": Array [
+          Object {
+            "label": "浦东新区",
+            "value": "pudong",
+          },
+          Object {
+            "label": "徐汇区",
+            "value": "xuhui",
+          },
+        ],
+        "label": "上海市",
+        "value": "shanghai",
+      },
+    ]
+  }
+/>
+`;
