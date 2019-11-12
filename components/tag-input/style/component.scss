@@ -2,22 +2,22 @@
   min-height: $height;
   line-height: $height - 2px;
 
-  .is-radius {
+  .radius {
     border-radius: $border-radius;
   }
 
-  .za-tag-input__div {
+  .ui-tag-input-div {
     font-size: $font-size;
   }
 
-  .za-tag-input__div-placeholder,
+  .ui-tag-input-div-placeholder,
   .value-text {
     font-size: $font-size;
   }
 }
 
-@include b(tag-input-box) {
-  @include tag-size($base-height,$base-padding, $base-fontSize-xs, $base-radius);
+.ui-tag-input-box {
+  @include tag-size($base-height, $base-padding, $base-fontSize-xs, $base-radius);
 
   font-size: 0;
   width: 100%;
@@ -36,15 +36,80 @@
     border-color: #ccc;
   }
 
-  &.is-disabled {
+  &.disabled {
     border-color: #d9d9d9;
     background-color: #f3f5f7;
   }
 
-  &.is-radius {
+  &.radius {
     border-radius: 4px;
   }
 
+  .ui-tag-input-div {
+    display: inline-block;
+    vertical-align: middle;
+    min-width: 5px;
+    padding: 0 2px;
+    width: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    outline: none;
+    max-width: 100%;
+  }
+
+  .ui-tag-input-div-placeholder,
+  .value-text {
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding-left: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 35px);
+  }
+
+  .ui-tag-input-div-placeholder {
+    color: #999;
+  }
+
+  .ui-tag-list-box {
+    max-width: 100%;
+    padding: 4px 0;
+    line-height: 0;
+    display: inline-block;
+    vertical-align: middle;
+
+    .ui-tag {
+      margin-right: 8px;
+    }
+  }
+
+  .arrow-bottom {
+    color: #d9d9d9;
+    will-change: transform;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transition: transform 0.5s;
+    transform: translateY(-50%) rotate(0deg);
+  }
+}
+
+.ui-tag-input-box-active {
+  border-color: #57c5f7;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+
+  .value-text {
+    color: #999;
+  }
+
+  .arrow-bottom {
+    transform: translateY(-50%) rotate(180deg);
+  }
+}
+
+.ui-tag-input-box {
   &.size-xl {
     @include tag-size($base-height-xl, $base-padding-xl, $base-fontSize-lg, $base-radius-xl);
   }
@@ -59,62 +124,5 @@
 
   &.size-xs {
     @include tag-size($base-height-xs, $base-padding-xs, $base-fontSize-xs, $base-radius-xs);
-  }
-
-  .za-tag-input__div {
-    display: inline-block;
-    vertical-align: middle;
-    min-width: 5px;
-    padding: 0 2px;
-    width: auto;
-    white-space: nowrap;
-    overflow: hidden;
-    outline: none;
-    max-width: 100%;
-  }
-
-  .za-tag-input__div-placeholder,
-  .value-text {
-    position: absolute;
-    left: 0;
-    top: 0;
-    padding-left: 10px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    max-width: calc(100% - 35px);
-  }
-
-  .za-tag-input__div-placeholder {
-    color: #999;
-  }
-
-  .za-tag-list-box {
-    padding: 4px 0;
-    line-height: 0;
-    display: inline-block;
-    vertical-align: middle;
-  }
-
-  .arrow-bottom {
-    color: #d9d9d9;
-    will-change: transform;
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transition: transform 0.5s;
-    transform: translateY(-50%) rotate(0deg);
-  }
-}
-
-.za-tag-input-box--active {
-  border-color: $base-theme-info;
-
-  .value-text {
-    color: #999;
-  }
-
-  .arrow-bottom {
-    transform: translateY(-50%) rotate(180deg);
   }
 }

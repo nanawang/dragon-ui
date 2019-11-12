@@ -26,20 +26,17 @@ class Table extends Component<PropsType, any> {
   };
 
   private scrollTable;
-
   private head;
-
   private body;
-
   private fixedLeftColumn;
-
   private fixedRightColumn;
 
   constructor(props) {
     super(props);
-    const selectedRows = 'rowSelection' in props
-      ? props.rowSelection.value || props.rowSelection.defaultValue || []
-      : [];
+    const selectedRows =
+      'rowSelection' in props
+        ? props.rowSelection.value || props.rowSelection.defaultValue || []
+        : [];
     const expandedRowKeys = this.getExpandedRowKeys();
     this.state = {
       selectedRows,
@@ -54,22 +51,39 @@ class Table extends Component<PropsType, any> {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { dataSource } = this.props;
     if ('rowSelection' in nextProps && 'value' in nextProps.rowSelection) {
       this.setState({
         selectedRows: nextProps.rowSelection.value,
       });
     }
-    if (nextProps.dataSource !== dataSource) {
+    if (nextProps.dataSource !== this.props.dataSource) {
       // 数据变更重新计算固定列宽高
       rAF.rAF(() => this.getFixedColAttrs());
+      // 如果之前有排序，按照之前排序dataSource
+      this.sortDataSource(nextProps.dataSource);
+    }
+  }
+
+  sortDataSource(dataSource) {
+    const { columns } = this.props;
+    const { sort } = this.state;
+    const sortKey = Object.keys(sort)[0];
+    if (sortKey) {
+      let column;
+      columns.forEach(({ dataIndex }, index) => {
+        if (dataIndex === sortKey) {
+          column = columns[index];
+        }
+      });
+      if (column && column.sorter) {
+        dataSource.sort(column.sorter);
+      }
     }
   }
 
   onSort = (column) => {
-    const { stateSort } = this.state;
     const { dataSource } = this.props;
-    const sort = !stateSort[column.dataIndex];
+    const sort = !this.state.sort[column.dataIndex];
 
     sort ? dataSource.sort(column.sorter) : dataSource.reverse();
 
@@ -78,7 +92,7 @@ class Table extends Component<PropsType, any> {
         [`${column.dataIndex}`]: sort,
       },
     });
-  };
+  }
 
   onEnterRow = (index) => {
     const { fixedleftTbody } = this.fixedLeftColumn;
@@ -94,11 +108,11 @@ class Table extends Component<PropsType, any> {
         toggleHoverStatus(tbody.querySelectorAll('tr'), index);
       }
     });
-  };
+  }
 
   onLeaveRow = () => {
     this.onEnterRow(-1);
-  };
+  }
 
   onScrollTable = (e) => {
     const { fixedleftCol } = this.fixedLeftColumn;
@@ -124,10 +138,10 @@ class Table extends Component<PropsType, any> {
         }
       }
     }
-  };
+  }
 
   getRowKey = (row, index) => {
-    const { rowKey } = this.props;
+    const { rowKey } =  this.props;
     let key;
 
     if (rowKey) {
@@ -136,7 +150,7 @@ class Table extends Component<PropsType, any> {
       key = index;
     }
     return key;
-  };
+  }
 
   // 获取初始化展开行
   getExpandedRowKeys() {
@@ -166,13 +180,11 @@ class Table extends Component<PropsType, any> {
     }
     const firstColumn = columns[0];
     const lastColumn = columns[columns.length - 1];
-    const { thead, leftCell, rightCell } = this.head;
+    const { thead } = this.head;
     const { row } = this.body;
 
     if (firstColumn.fixed || lastColumn.fixed || (rowSelection && rowSelection.fixed)) {
       const fixedColThHeight = getStyleComputedProperty(thead, 'height');
-      const fixedleftColWidth = getStyleComputedProperty(leftCell, 'width');
-      const fixedrightColWidth = getStyleComputedProperty(rightCell, 'width');
       let fixedColTdHeight = '40';
       if (row) {
         fixedColTdHeight = getStyleComputedProperty(row, 'height');
@@ -182,8 +194,6 @@ class Table extends Component<PropsType, any> {
         fixedColAttrs: {
           fixedColThHeight,
           fixedColTdHeight,
-          fixedleftColWidth,
-          fixedrightColWidth,
         },
       });
     }
@@ -208,7 +218,7 @@ class Table extends Component<PropsType, any> {
     this.setState({
       expandedRowKeys: keys,
     });
-  };
+  }
 
   // 渲染固定左侧的列
   renderFixedLeftCol() {
@@ -262,7 +272,7 @@ class Table extends Component<PropsType, any> {
           checked={dataSource.length > 0 && (this.state.selectedRows.length === dataSource.length)}
           onChange={(e) => {
             const selected = e.target.checked;
-            const selectedRows = selected ? dataSource.map((data) => data) : [];
+            const selectedRows = selected ? dataSource.map(data => data) : [];
 
             this.setState({ selectedRows });
             if (rowSelection.onSelectAll) {
@@ -272,7 +282,7 @@ class Table extends Component<PropsType, any> {
         />
       </th>
     );
-  };
+  }
 
   // 渲染单选
   renderSelect = (rowSelection, row, height = 40) => {
@@ -298,7 +308,7 @@ class Table extends Component<PropsType, any> {
         />
       </td>
     );
-  };
+  }
 
   // 渲染单元格
   renderCell = (column, row, rowIndex, columnIndex) => {
@@ -313,7 +323,7 @@ class Table extends Component<PropsType, any> {
         columnIndex={columnIndex}
       />
     );
-  };
+  }
 
   renderTable() {
     const {
@@ -374,6 +384,7 @@ class Table extends Component<PropsType, any> {
   }
 
   render() {
+    const { props } = this;
     const {
       isBordered,
       isStriped,
@@ -383,24 +394,30 @@ class Table extends Component<PropsType, any> {
       size,
       className,
       prefixCls,
-    } = this.props;
+    } = props;
 
     const cls = classnames({
       [prefixCls!]: true,
-      [`${prefixCls}-bordered`]: 'bordered' in this.props || isBordered,
-      [`${prefixCls}-striped`]: 'striped' in this.props || isStriped,
-      [`${prefixCls}-radius`]: 'radius' in this.props || isRadius,
-      [`${prefixCls}-hover`]: 'hover' in this.props || isHover,
+      [`${prefixCls}-bordered`]: 'bordered' in props || isBordered,
+      [`${prefixCls}-striped`]: 'striped' in props || isStriped,
+      [`${prefixCls}-radius`]: 'radius' in props || isRadius,
+      [`${prefixCls}-hover`]: 'hover' in props || isHover,
       [`size-${size}`]: !!size,
       [className!]: !!className,
     });
 
+    const content = isLoading ? (
+      <Loading visible>{this.renderTable()}</Loading>
+    ) : (
+      this.renderTable()
+    );
+
     return (
       <div className={cls}>
         <div className={`${prefixCls}-body`} onScroll={this.onScrollTable}>
-          <Loading visible={isLoading}>{this.renderTable()}</Loading>
-          {this.renderFixedLeftCol()}
+          {content}
           {this.renderFixedRightCol()}
+          {this.renderFixedLeftCol()}
         </div>
       </div>
     );

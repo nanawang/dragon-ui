@@ -36,7 +36,6 @@
           }
         ]
       });
-      console.log(this.ref.current);
     }, 1000);
   }
   render() {
@@ -44,7 +43,7 @@
     return (
       <div>
         <Select
-          style={{ width: 200 }}
+          style={{ width: 300 }}
           ref={this.ref}
           onChange={(data) => {
             console.log(data);
@@ -80,7 +79,7 @@
         <Select
           disabled
           title="我是A"
-          style={{ width: 200 }}
+          style={{ width: 300 }}
           value="a"
         >
           <Select.Option value="a">我是A</Select.Option>
@@ -113,7 +112,7 @@
         <Select
           search
           value={this.state.selectValue}
-          style={{ width: 200 }}
+          style={{ width: 300 }}
           // searchPlaceholder="输入关键字"
           onSearchChange={(value) => {
             console.log(value)
@@ -156,7 +155,7 @@
         <Select
           remoteSearch
           value={this.state.selectValue}
-          style={{ width: 200 }}
+          style={{ width: 300 }}
           searchPlaceholder="输入关键字"
           onSearchChange={(value) => {
             console.log(value)
@@ -202,14 +201,14 @@
         <Select
           multiple
           value={this.state.selectValue}
-          style={{ width: 200 }}
+          style={{ width: 300 }}
           onChange={(selectedArr,selectedData) => {
             console.log(selectedArr, selectedData);
             this.setState({
               selectValue: selectedArr
             });
           }}>
-          <Select.Option value="a">{[this.state.c,this.state.b]}</Select.Option>
+          <Select.Option value="a" title="这是自定义title">{[this.state.c,this.state.b]}</Select.Option>
           <Select.Option value="b">我是B</Select.Option>
           <Select.Option value="c">我是C</Select.Option>
           <Select.Option value="d">我是D</Select.Option>
@@ -247,7 +246,7 @@
           search
           multiple
           value={this.state.selectValue}
-          style={{ width: 200 }}
+          style={{ width: 300 }}
           onChange={(selectedArr) => {
             console.log(selectedArr);
             this.setState({
@@ -321,7 +320,7 @@ type selectedValueData = Array<{value:string; text:ReactNode; index:number}>;
         <Select
           radius
           value={this.state.selectValue}
-          style={{ width: 200 }}
+          style={{ width: 300 }}
           // searchPlaceholder="输入关键字"
           onChange={(data) => {
             this.setState({

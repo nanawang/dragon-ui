@@ -1,6 +1,6 @@
-import { CSSProperties, SyntheticEvent } from 'react';
+export type triggerType = 'change' | 'blur' | 'none' | '';
 
-export type triggerType = 'change' | 'blur' | 'none';
+type LabelPosition = 'left' | 'right' | '';
 
 export interface ItemProps {
   prefixCls?: string;
@@ -8,23 +8,20 @@ export interface ItemProps {
   label?: string;
   labelClassName?: string;
   controlCol?: string;
-  className?: string;
+  isRequired?: boolean;
+  required?: boolean;
   help?: string;
-  style?: CSSProperties;
   rules?: object;
   prop?: string;
-  required?: boolean;
 }
 
 export default interface PropsType {
-  type?: string;
   prefixCls?: string;
-  className?: string;
-  style?: CSSProperties;
+  type?: 'horizontal' | 'inline';
   model?: object;
   rules?: object;
   labelWidth?: string | number;
-  labelPosition?: string;
+  labelPosition?: LabelPosition;
   scrollToError?: boolean;
-  onSubmit?: (event: SyntheticEvent<HTMLFormElement>) => void;
+  onSubmit?: (event: React.SyntheticEvent<HTMLFormElement>) => void;
 }

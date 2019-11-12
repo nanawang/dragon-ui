@@ -2,16 +2,25 @@
 
 exports[`Tooltip renders normal Tooltip correctly 1`] = `
 <div
-  class="zw-tooltip"
+  class="ui-popover ui-tooltip"
 >
   <div
-    class="zw-tooltip__inner"
+    class="ui-popover-content ui-popover-content-radius"
   >
-    <div
-      id="hello"
-    >
-      Hello world!
-    </div>
+    这是一个left定位的Tooltip
+    <span
+      class="ui-popover-arrow"
+    />
   </div>
+  <span>
+    <div>
+      <button
+        class="ui-button radius theme-default"
+        type="button"
+      >
+        left
+      </button>
+    </div>
+  </span>
 </div>
 `;

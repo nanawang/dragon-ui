@@ -77,7 +77,7 @@ class Swipe extends Component<PropsType, any> {
   }
 
   parseItem(children) {
-    if (children.length === 0) {
+    if (React.Children.count(children) === 0) {
       return;
     }
 

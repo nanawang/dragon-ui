@@ -2,63 +2,48 @@
 
 exports[`Form renders inline Form with label correctly 1`] = `
 <form
-  class="za-form za-form--inline za-form--label-right"
+  class="ui-form ui-form-inline"
 >
   <div
-    class="za-form-item col-sm-4"
+    class="ui-form-item col-sm-4"
   >
-    <label
-      class="za-form-item__label"
-    >
+    <label>
       类型
     </label>
     <div
-      class="za-form-item__control"
+      class="ui-form-item-control"
     >
-      <div
-        class="ui-input-box shape-radius"
-      >
-        <input
-          class="ui-input"
-          placeholder="请输入..."
-          type="text"
-        />
-      </div>
+      <input
+        class="ui-input radius"
+        placeholder="请输入..."
+        type="text"
+      />
     </div>
   </div>
   <div
-    class="za-form-item col-sm-4"
+    class="ui-form-item col-sm-4"
   >
-    <label
-      class="za-form-item__label"
-    >
+    <label>
       来源
     </label>
     <div
-      class="za-form-item__control"
+      class="ui-form-item-control"
     >
-      <div
-        class="ui-input-box shape-radius"
-      >
-        <input
-          class="ui-input"
-          placeholder="请输入..."
-          type="text"
-        />
-      </div>
+      <input
+        class="ui-input radius"
+        placeholder="请输入..."
+        type="text"
+      />
     </div>
   </div>
   <div
-    class="za-form-item col-sm-4"
+    class="ui-form-item col-sm-4"
   >
-    <label
-      class="za-form-item__label"
-    />
     <div
-      class="za-form-item__control"
+      class="ui-form-item-control"
     >
       <button
-        class="zw-button zw-button--success zw-button--radius"
+        class="ui-button radius theme-success"
         type="button"
       >
         查询
@@ -70,83 +55,55 @@ exports[`Form renders inline Form with label correctly 1`] = `
 
 exports[`Form renders inline Form with required fields and help correctly 1`] = `
 <form
-  class="za-form za-form--inline za-form--label-right"
+  class="ui-form ui-form-inline"
 >
   <div
-    class="za-form-item col-sm-4"
+    class="ui-form-item col-sm-4"
   >
-    <label
-      class="za-form-item__label"
-    >
+    <label>
       类型
     </label>
     <div
-      class="za-form-item__control"
+      class="ui-form-item-control"
     >
-      <div
-        class="ui-input-box shape-radius"
-      >
-        <input
-          class="ui-input"
-          placeholder="请输入..."
-          type="text"
-        />
-      </div>
+      <input
+        class="ui-input radius"
+        placeholder="请输入..."
+        type="text"
+      />
     </div>
   </div>
   <div
-    class="za-form-item col-sm-4"
+    class="ui-form-item col-sm-4"
   >
-    <label
-      class="za-form-item__label"
-    >
+    <label>
       <span
-        class="za-form-item--required"
+        class="ui-form-item-required"
       >
         <i
-          class="zw-icon zw-icon--required zw-icon--default zw-icon--md"
-          theme="default"
-          type="required"
-        >
-          <svg
-            fill="currentColor"
-            height="1em"
-            viewBox="0 0 32 32"
-            width="1em"
-          >
-            <use
-              href="#required"
-            />
-          </svg>
-        </i>
+          class="ui-icon ui-icon-required theme-default"
+        />
       </span>
       来源
     </label>
     <div
-      class="za-form-item__control"
+      class="ui-form-item-control"
     >
-      <div
-        class="ui-input-box shape-radius"
-      >
-        <input
-          class="ui-input"
-          placeholder="请输入..."
-          type="text"
-        />
-      </div>
+      <input
+        class="ui-input radius"
+        placeholder="请输入..."
+        type="text"
+      />
     </div>
   </div>
   <div
-    class="za-form-item col-sm-4"
+    class="ui-form-item col-sm-4"
   >
-    <label
-      class="za-form-item__label"
-    />
     <div
-      class="za-form-item__control"
+      class="ui-form-item-control"
     >
       <button
-        class="zw-button zw-button--success zw-button--radius"
+        class="ui-button radius theme-success"
         type="button"
       >
         查询
@@ -158,60 +115,48 @@ exports[`Form renders inline Form with required fields and help correctly 1`] = 
 
 exports[`Form renders normal Form correctly 1`] = `
 <form
-  class="za-form za-form--horizontal za-form--label-right"
+  class="ui-form ui-form-horizontal"
 >
   <div
-    class="za-form-item"
+    class="ui-form-item"
   >
-    <label
-      class="za-form-item__label"
-    >
+    <label>
       账号
     </label>
     <div
-      class="za-form-item__control"
+      class="ui-form-item-control"
     >
-      <div
-        class="ui-input-box shape-radius"
-      >
-        <input
-          class="ui-input"
-          placeholder="请输入..."
-          type="text"
-        />
-      </div>
+      <input
+        class="ui-input radius"
+        placeholder="请输入..."
+        type="text"
+      />
     </div>
   </div>
   <div
-    class="za-form-item"
+    class="ui-form-item"
   >
-    <label
-      class="za-form-item__label"
-    >
+    <label>
       密码
     </label>
     <div
-      class="za-form-item__control"
+      class="ui-form-item-control"
     >
-      <div
-        class="ui-input-box shape-radius"
-      >
-        <input
-          class="ui-input"
-          placeholder="请输入..."
-          type="text"
-        />
-      </div>
+      <input
+        class="ui-input radius"
+        placeholder="请输入..."
+        type="text"
+      />
     </div>
   </div>
   <div
-    class="za-form-item"
+    class="ui-form-item"
   >
     <div
-      class="za-form-item__control"
+      class="ui-form-item-control"
     >
       <button
-        class="zw-button zw-button--success zw-button--radius"
+        class="ui-button radius theme-success"
         type="button"
       >
         登录

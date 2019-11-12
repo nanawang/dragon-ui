@@ -5,6 +5,7 @@ export type themeType = 'default' | 'primary' | 'success' | 'warning' | 'danger'
 export interface ValueArray {
   key: any;
   value: ReactNode;
+  title?: string;
 }
 
 export default interface Props {

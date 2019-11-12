@@ -1,30 +1,29 @@
-import React, { PureComponent } from 'react';
+import React, { HTMLAttributes, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { FormContext } from './createContext';
 import PropsType, { ItemProps } from './PropsType';
-import { noop } from '../utils';
+import FormItem from './FormItem';
 
-class Form extends PureComponent<PropsType, any> {
+class Form extends PureComponent<PropsType & HTMLAttributes<HTMLDivElement>> {
+  static Item: typeof FormItem;
   static defaultProps = {
-    prefixCls: 'za-form',
+    prefixCls: 'ui-form',
     type: 'horizontal',
-    labelPosition: 'right',
+    labelPosition: '',
     scrollToError: false,
-    onSubmit: noop,
+    onSubmit: () => {},
     labelWidth: '',
     rules: null,
     model: null,
   };
-
   static propTypes = {
     prefixCls: PropTypes.string,
     type: PropTypes.oneOf(['horizontal', 'inline']),
     labelWidth: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    labelPosition: PropTypes.oneOf(['left', 'right']),
+    labelPosition: PropTypes.oneOf(['left', 'right', '']),
     rules: PropTypes.instanceOf(Object),
     model: PropTypes.instanceOf(Object),
-    scrollToError: PropTypes.bool,
     onSubmit: PropTypes.func,
   };
 
@@ -39,19 +38,6 @@ class Form extends PureComponent<PropsType, any> {
   state = {
     fields: [],
   };
-
-  onSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
-    const { onSubmit } = this.props;
-    event.preventDefault();
-    if (typeof onSubmit === 'function') {
-      onSubmit(event);
-    }
-  };
-
-  resetField() {
-    const { fields } = this.state;
-    fields.forEach((field: any) => field.resetItem());
-  }
 
   validate(callback) {
     const { fields } = this.state;
@@ -69,7 +55,6 @@ class Form extends PureComponent<PropsType, any> {
             validateResult = false;
             errorsArr.push(field);
           }
-          // eslint-disable-next-line no-plusplus
           if (++count === fieldsLength) {
             resolve(validateResult);
             if (callback instanceof Function) {
@@ -95,19 +80,28 @@ class Form extends PureComponent<PropsType, any> {
     field.validateItem('', callback);
   }
 
-  render() {
+  resetField() {
     const { fields } = this.state;
-    const { type, className, children, style, prefixCls, labelWidth, labelPosition, rules, model } = this.props;
-    const cls = classnames({
-      [prefixCls!]: true,
-      [`${prefixCls}--${type}`]: 'type' in this.props,
-      [`${prefixCls}--label-${labelPosition}`]: labelPosition,
-      [className!]: !!className,
+    fields.forEach((field: any) => field.resetItem());
+  }
+
+  onSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
+    const { onSubmit } = this.props;
+    event.preventDefault();
+    if (typeof onSubmit === 'function') {
+      onSubmit(event);
+    }
+  }
+
+  render() {
+    const { type, className, children, style, prefixCls, labelWidth, labelPosition } = this.props;
+    const cls = classnames(className, prefixCls, {
+      [`${prefixCls}-${type}`]: 'type' in this.props,
     });
     const contextValue = {
-      fields,
-      rules,
-      model,
+      fields: this.state.fields,
+      rules: this.props.rules,
+      model: this.props.model,
       labelWidth,
       labelPosition,
     };

@@ -1,4 +1,5 @@
-import React, { Component, ReactNode } from 'react';
+import React, { Component, ReactNode, ReactElement } from 'react';
+import classnames from 'classnames';
 import Events from '../utils/events';
 import { FormItemContext } from '../form/createContext';
 import Option from './Option';
@@ -6,16 +7,17 @@ import Dropdown from '../dropdown';
 import Menu from '../menu';
 import InputWithTags from '../tag-input';
 import PropsType, { OptionProps } from './PropsType';
-import LocaleReceiver from '../locale-provider/LocaleReceiver';
+import LocaleReceiver from '../locale/LocaleReceiver';
 import SelectMultiple from './SelectMultiple';
 import { isEmpty } from '../utils';
+import { Icon } from '..';
 
 interface StateProps {
   value: string | string[];
   dropdown: boolean;
   searchValue: string | null;
   showPlacehoder: boolean;
-  optionMap: { [x: string]: any; [y: number]: any };
+  optionMap: { [x: string]: any, [y: number]: any };
   optionData: Array<OptionDataProps>;
 }
 
@@ -29,85 +31,42 @@ interface OptionDataProps {
 const EMPTY_STRING = '';
 const EMPTY_STRING_VALUE = '$$EMPTY_STRING_VALUE';
 
+function stringArray(data: React.ReactNode) {
+  if (Array.isArray(data)) {
+    if (data.every(item => typeof item === 'string' || typeof item === 'number')) {
+      return data.join('');
+    }
+    return data;
+  }
+  return data;
+}
+
 /**
  * placeholder
  */
 class Select extends Component<PropsType, StateProps> {
   static contextType = FormItemContext;
-
   static defaultProps = {
-    prefixCls: 'za-select',
-    radius: true,
+    prefixCls: 'ui-select',
+    isRadius: true,
+    isDisabled: false,
+    isSearch: false,
     onSearchChange: () => { },
     onChange: () => { },
+    clearable: false,
   };
 
-  static Option: typeof Option = Option;
-
-  static Multiple: typeof SelectMultiple = SelectMultiple;
-
-  static mapEmptyStringToEmptyValue(values) {
-    if (Array.isArray(values)) {
-      return values.map((value) => {
-        if (value === EMPTY_STRING) {
-          return EMPTY_STRING_VALUE;
-        }
-        return value;
-      });
-    } if (values === EMPTY_STRING) {
-      return EMPTY_STRING_VALUE;
-    }
-
-    return values;
-  }
-
-  static getOptionMap(options: ReactNode): [{}, Array<any>] {
-    if (!Array.isArray(options)) {
-      options = [options];
-    }
-
-    const optionData: Array<OptionDataProps> = [];
-    const optionMap: { [x: string]: any } = {};
-
-    React.Children.map(options, (option: any) => {
-      if (option && typeof option === 'object' && option.type) {
-        const value = Select.mapEmptyStringToEmptyValue(option.props.value);
-        if (option.props && value) {
-          // handle optionMap
-          optionMap[value] = option;
-          // handle OptionData
-          optionData.push({
-            key: option.key,
-            props: option.props,
-            value,
-            children: option.props.children,
-          });
-        }
-      }
-      return optionMap;
-    });
-    return [optionMap, optionData];
-  }
-
-  static mapEmptyValueToEmptyString(selected) {
-    return selected.map((select) => {
-      if (select === EMPTY_STRING_VALUE) {
-        return EMPTY_STRING;
-      }
-      return select;
-    });
-  }
+  static Option: typeof Option;
+  static Multiple: typeof SelectMultiple;
 
   inputBox!: HTMLInputElement;
-
   inputWithTags!: InputWithTags;
-
-  oldInputDivHeight = 0;
+  oldInputDivHeight: number = 0;
 
   constructor(props: PropsType) {
     super(props);
-    const value = props.value === undefined ? props.defaultValue : props.value;
-    const state: StateProps = {
+    let value = props.value === undefined ? props.defaultValue : props.value;
+    let state: StateProps = {
       value: String(value),
       dropdown: false,
       searchValue: '',
@@ -115,20 +74,19 @@ class Select extends Component<PropsType, StateProps> {
       optionMap: {},
       optionData: [],
     };
-    const { children } = this.props;
 
     if (props.multiple) {
       if (!Array.isArray(value)) {
         state.value = [String(value)];
       } else {
-        state.value = value.map((val) => String(val));
+        state.value = value.map(val => String(val));
       }
     } else {
       state.value = String(value);
     }
 
-    state.value = Select.mapEmptyStringToEmptyValue(state.value);
-    const [optionMap, optionData] = Select.getOptionMap(children);
+    state.value = this.mapEmptyStringToEmptyValue(state.value);
+    const [optionMap, optionData] = this.getOptionMap(this.props.children);
     state.optionMap = optionMap;
     state.optionData = optionData;
     this.state = state;
@@ -138,25 +96,54 @@ class Select extends Component<PropsType, StateProps> {
     this.bindOuterHandlers();
   }
 
+  getOptionMap(options: ReactNode): [{}, Array<any>] {
+    if (!Array.isArray(options)) {
+      options = [options];
+    }
+
+    let optionData: Array<OptionDataProps> = [];
+    let optionMap: { [x: string]: any } = {};
+
+    React.Children.map(options, (option: ReactElement<OptionProps>) => {
+      if (option && React.isValidElement(option)) {
+        if (typeof option.type === 'function' && option.type.displayName === 'Option') {
+          let value = this.mapEmptyStringToEmptyValue(option.props.value);
+          if (option.props && value) {
+            // handle optionMap
+            optionMap[value] = option;
+            // handle OptionData
+            optionData.push({
+              key: option.key,
+              props: option.props,
+              value,
+              children: option.props.children,
+            });
+          }
+        }
+      }
+      return optionMap;
+    });
+    return [optionMap, optionData];
+  }
+
   componentWillReceiveProps(nextProps) {
-    const { defaultValue, children } = this.props;
-    if ('value' in nextProps || nextProps.defaultValue !== defaultValue) {
+    if ('value' in nextProps || nextProps.defaultValue !== this.props.defaultValue) {
       let value = nextProps.value === undefined ? nextProps.defaultValue : nextProps.value;
       if (nextProps.multiple) {
         if (!Array.isArray(value)) {
           value = [String(value)];
         } else {
-          value = value.map((val) => String(val));
+          value = value.map(val => String(val));
         }
       } else {
         value = String(value);
       }
       this.setState({
-        value: Select.mapEmptyStringToEmptyValue(value),
+        value: this.mapEmptyStringToEmptyValue(value),
       });
     }
-    if (nextProps.children !== children) {
-      const [optionMap, optionData] = Select.getOptionMap(nextProps.children);
+    if (nextProps.children !== this.props.children) {
+      const [optionMap, optionData] = this.getOptionMap(nextProps.children);
       this.setState({
         optionData,
         optionMap,
@@ -168,10 +155,13 @@ class Select extends Component<PropsType, StateProps> {
     this.unbindOuterHandlers();
   }
 
-  onOptionChange(_: React.MouseEvent, props, index) {
-    const { multiple, onChange } = this.props;
-    const { handleFieldChange } = this.context;
-    const { optionMap, optionData, value: stateValue } = this.state;
+  onOptionChange = (e) => {
+    const { index, value } = e.currentTarget.dataset;
+    const currentData = this.state.optionMap[value];
+    if (!currentData) {
+      return;
+    }
+    const props = currentData.props;
     if ('disabled' in props || props.isDisabled) {
       return;
     }
@@ -182,45 +172,48 @@ class Select extends Component<PropsType, StateProps> {
       this.inputBox.textContent = '';
     }
     if (!isEmpty(this.context)) {
-      handleFieldChange();
+      this.context.handleFieldChange();
     }
 
-    const value = String(props.value);
-
-    if (multiple) {
-      const selected = Select.mapEmptyValueToEmptyString((stateValue as Array<string>).slice());
-      const position = selected.indexOf(value);
+    if (this.props.multiple) {
+      const selected = this.mapEmptyValueToEmptyString((this.state.value as Array<string>).slice());
+      const currentValue = this.mapEmptyValueToEmptyString(value);
+      const position = selected.indexOf(currentValue);
       if (position === -1) {
-        selected.push(value);
+        selected.push(currentValue);
       } else {
         selected.splice(position, 1);
       }
       const selectedData = selected.map((select) => {
-        const selectValue = select || EMPTY_STRING_VALUE;
-        const vdom = optionMap[selectValue];
+        let selectValue = select || EMPTY_STRING_VALUE;
+        const vdom = this.state.optionMap[selectValue];
         const text = vdom ? vdom.props.children : '';
-        const indexs = optionData.findIndex((elem) => String(elem.value) === String(selectValue));
-        return { text, value: select, indexs };
+        let index = this.state.optionData.findIndex(elem => String(elem.value) === String(selectValue));
+        return { text, value: select, index };
       });
       this.setState({
-        value: Select.mapEmptyStringToEmptyValue(selected),
+        value: this.mapEmptyStringToEmptyValue(selected),
       }, () => {
-        onChange(selected, selectedData);
+        this.props.onChange(selected, selectedData);
       });
       return;
     }
 
     const selected = {
-      index,
-      value,
+      index: Number(index),
+      value: this.mapEmptyValueToEmptyString(value),
       text: Array.isArray(props.children) ? props.children.join() : props.children,
     };
 
     this.setState({
-      value: Select.mapEmptyStringToEmptyValue(value),
+      value: this.mapEmptyStringToEmptyValue(value),
     }, () => {
-      this.setDropdown(false, () => onChange(selected));
+      this.setDropdown(false, () => this.props.onChange(selected));
     });
+  }
+
+  inputWithTagsRef = (e) => {
+    this.inputWithTags = e;
   }
 
   setDropdown(isOpen, callback?) {
@@ -237,12 +230,52 @@ class Select extends Component<PropsType, StateProps> {
     );
   }
 
-  inputWithTagsRef = (e) => {
-    this.inputWithTags = e;
-  };
+  mapEmptyStringToEmptyValue(values) {
+    if (Array.isArray(values)) {
+      return values.map((value) => {
+        if (value === EMPTY_STRING) {
+          return EMPTY_STRING_VALUE;
+        }
+        return value;
+      });
+    } else if (values === EMPTY_STRING) {
+      return EMPTY_STRING_VALUE;
+    }
+
+    return values;
+  }
+
+  mapEmptyValueToEmptyString(selected) {
+    if (Array.isArray(selected)) {
+      return selected.map((select) => {
+        if (select === EMPTY_STRING_VALUE) {
+          return EMPTY_STRING;
+        }
+        return select;
+      });
+    } else if (selected === EMPTY_STRING_VALUE) {
+      return EMPTY_STRING;
+    }
+
+    return selected;
+  }
+
+  handleKeyup = (e) => {
+    if (this.state.dropdown === true && e.keyCode === 27) {
+      this.setDropdown(false);
+    }
+  }
+
+  bindOuterHandlers() {
+    Events.on(document, 'keyup', this.handleKeyup);
+  }
+
+  unbindOuterHandlers() {
+    Events.off(document, 'keyup', this.handleKeyup);
+  }
 
   onDeleteTag = (_e, _key, _value, index) => {
-    const selected = Select.mapEmptyValueToEmptyString((this.state.value as Array<string>).slice());
+    const selected = this.mapEmptyValueToEmptyString((this.state.value as Array<string>).slice());
     selected.splice(index, 1);
     const selectedData = selected.map((select, selectIndex) => {
       const vdom = this.state.optionMap[select || EMPTY_STRING_VALUE];
@@ -254,7 +287,7 @@ class Select extends Component<PropsType, StateProps> {
       };
     });
     this.props.onChange(selected, selectedData);
-  };
+  }
 
   onSearchValueChange = (value) => {
     const { onSearchChange } = this.props;
@@ -268,29 +301,69 @@ class Select extends Component<PropsType, StateProps> {
         onSearchChange(this.state.searchValue);
       }
     });
-  };
-
-  bindOuterHandlers() {
-    Events.on(document, 'keyup', (e) => this.handleKeyup(e));
   }
 
-  unbindOuterHandlers() {
-    Events.off(document, 'keyup', (e) => this.handleKeyup(e));
-  }
-
-
-  handleKeyup(e) {
-    const { dropdown } = this.state;
-    if (dropdown === true && e.keyCode === 27) {
-      this.setDropdown(false);
+  filterCondition(option, optionIndex: number) {
+    if (this.props.search && this.state.searchValue) {
+      return String(option.props.children).includes(this.state.searchValue);
+    } else { // remoteSearch会走此处逻辑
+      return optionIndex > -1;
     }
   }
 
+  renderChildren() {
+    const { optionData, value } = this.state;
+    const children: Array<ReactNode> = [];
+    for (let i = 0; i < optionData.length; i++) {
+      const elem = optionData[i];
+      if (this.filterCondition(elem, i)) {
+        const checked = Array.isArray(value) ? value.indexOf(String(elem.value)) > -1 : String(elem.value) === value;
+        const childrenText = stringArray(elem.children);
+        children.push(
+          <Option
+            {...elem.props}
+            key={elem.value}
+            showCheckIcon={checked}
+            checked={checked}
+            data-index={i}
+            data-value={elem.value}
+            onChange={this.onOptionChange}
+          >
+            {childrenText}
+          </Option>);
+      }
+    }
+    return children;
+  }
+
+  onClearBtnClick: React.MouseEventHandler = (e) => {
+    e.stopPropagation();
+    this.setState({
+      value: '',
+      searchValue: '',
+    }, () => {
+      if (this.props.onChange) {
+        this.props.onChange({
+          value: '',
+          text: '',
+          index: 0,
+        });
+      }
+      // TODO not able to make a input event
+      // if (this.props.isSearch && this.props.onSearchChange) {
+      //   this.props.onSearchChange(e);
+      // }
+    });
+  }
+
   render() {
-    const { searchValue, value, optionMap, optionData, dropdown } = this.state;
+    const { props } = this;
     const {
       prefixCls,
       placeholder,
+      isRadius,
+      isDisabled,
+      isSearch,
       size,
       tagTheme,
       style,
@@ -299,75 +372,75 @@ class Select extends Component<PropsType, StateProps> {
       getPopupContainer,
       locale,
       remoteSearch,
-    } = this.props;
+      clearable,
+      triggerProps,
+      className,
+    } = props;
 
-    const disabled = 'disabled' in this.props;
-    const radius = 'radius' in this.props;
-    const search = 'search' in this.props;
+    const triggerBoxStyle: React.CSSProperties = { ...style, position: 'relative' };
 
-    const placeholderText = placeholder || locale!.placeholder;
+    const disabled = 'disabled' in props || isDisabled;
+    const radius = 'radius' in props || isRadius;
+    const search = 'search' in props || isSearch;
+
+    let placeholderText = placeholder || locale!.placeholder;
 
     let valueText;
-    if (multiple && Array.isArray(value)) {
-      valueText = value.reduce((prev: any, item) => {
-        if (optionMap[item]) {
+    if (multiple && Array.isArray(this.state.value)) {
+      valueText = this.state.value.reduce((prev: any, item) => {
+        const option = this.state.optionMap[item];
+        if (option) {
+          const { children, title } = option.props;
           prev.push({
             key: item,
-            value: optionMap[item].props.children,
+            value: children,
+            title: title,
           });
         }
         return prev;
       }, []);
     } else {
-      const optionProps = optionMap[value as string];
+      let optionProps = this.state.optionMap[this.state.value as string];
       if (optionProps) {
-        const optionChildren = optionProps.props.children;
+        let optionChildren = optionProps.props.children;
         Array.isArray(optionChildren) ? valueText = optionChildren.join() : valueText = optionChildren;
       }
     }
-
-    const children: Array<ReactNode> = [];
-    const filterCondition = (option, optionIndex: number) => {
-      if (search && searchValue) {
-        return String(option.props.children).includes(searchValue);
-      }  // remoteSearch会走此处逻辑
-      return optionIndex > -1;
-    };
-    optionData.filter(filterCondition).forEach((elem, index) => {
-      const checked = Array.isArray(value) ? value.indexOf(String(elem.value)) > -1 : String(elem.value) === value;
-      children.push(
-        <Option
-          key={elem.key || elem.value}
-          showCheckIcon={checked}
-          {...elem.props}
-          checked={checked}
-          onChange={(e) => {
-            this.onOptionChange(e, elem.props, index);
-          }}
-        >
-          {elem.children}
-        </Option>,
-      );
-    });
 
     const menuStyle = {
       maxHeight: 250,
       overflow: 'auto',
     };
 
-    const menus = children && children.length > 0
-      ? <Menu size={size} style={menuStyle}>{children}</Menu>
-      : <span className={`${prefixCls}--notfound`}>{locale!.noMatch}</span>;
+    const children = this.renderChildren();
+    const menus =
+      children && children.length > 0
+        ? <Menu style={menuStyle}>{children}</Menu>
+        : <span className={`${prefixCls}-notfound`}>{locale!.noMatch}</span>;
+
+    const triggerBoxProps = triggerProps ? {
+      ...triggerProps,
+      className: classnames({
+        [`${triggerProps.className}`]: !!triggerProps.className,
+        [`${prefixCls}-trigger-box`]: true,
+      }),
+    } : {
+        className: classnames({
+          [`${prefixCls}-trigger-box`]: true,
+        }),
+      };
 
     return (
       <Dropdown
-        triggerBoxStyle={style}
+        triggerBoxStyle={triggerBoxStyle}
+        triggerProps={triggerBoxProps}
         disabled={disabled}
-        visible={dropdown}
+        visible={this.state.dropdown}
         isRadius={radius}
         overlay={menus}
         zIndex={zIndex}
         getPopupContainer={getPopupContainer}
+        className={className}
         onVisibleChange={(visible) => {
           if (visible === true) {
             this.setState({ dropdown: visible, searchValue: '' });
@@ -383,18 +456,25 @@ class Select extends Component<PropsType, StateProps> {
           disabled={disabled}
           ref={this.inputWithTagsRef}
           style={style}
-          searchValue={searchValue}
+          searchValue={this.state.searchValue}
           search={search}
           remoteSearch={remoteSearch}
-          active={dropdown}
+          active={this.state.dropdown}
           value={valueText}
           placeholder={placeholderText}
           onDeleteTag={this.onDeleteTag}
           onSearchChange={this.onSearchValueChange}
         />
+        {
+          clearable && !disabled && !multiple && <Icon
+            type="wrong-round-fill"
+            className={`clear-btn${valueText ? ' clear-btn-show' : ''}`}
+            onClick={this.onClearBtnClick}
+          />
+        }
       </Dropdown>
     );
   }
 }
 
-export default LocaleReceiver('Select')(Select);
+export default LocaleReceiver(Select, 'Select');

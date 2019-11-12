@@ -40,12 +40,13 @@ class Cell extends Component<CellProps, any> {
   render() {
     const { maxCellSize, column, row, rowIndex, columnIndex } = this.props;
     const value = row[column.dataIndex];
-    const { style = {} } = column;
-    const render = 'render' in column ? column.render(value, row, rowIndex) : value;
+    const { style = {}, fixed } = column;
+    const render =
+      'render' in column ? column.render(value, row, rowIndex) : value;
 
     // 渲染需合并的单元格
-    if (render && typeof render === 'object'
-      && ('colSpan' in render || 'rowSpan' in render)
+    if (render && typeof render === 'object' &&
+      ('colSpan' in render || 'rowSpan' in render)
     ) {
       return this.renderMergedCell(column, columnIndex, render);
     }
@@ -53,9 +54,18 @@ class Cell extends Component<CellProps, any> {
     if (typeof render === 'string' && render.length > maxCellSize && maxCellSize !== 0) {
       return (
         <td key={column.dataIndex + columnIndex} style={style}>
-          <Popover trigger="hover" direction="top" content={render}>
+          <Popover popoverClassName="ui-table-cell-poppover" trigger="hover" direction="top" content={render}>
             <div className="ellipsis-cell" style={{ maxWidth: 15 * maxCellSize }}>{render}</div>
           </Popover>
+        </td>
+      );
+    }
+    if (fixed) {
+      return (
+        <td key={column.dataIndex + columnIndex} style={style}>
+          <div style={{ opacity: 0 }}>
+            {render}
+          </div>
         </td>
       );
     }

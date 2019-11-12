@@ -1,72 +1,74 @@
-import React, { PureComponent, ReactElement, createRef } from 'react';
+import React, { createRef, HTMLAttributes, PureComponent, ReactElement, RefObject } from 'react';
 import PropTypes from 'prop-types';
 import Schema from 'async-validator';
 import classnames from 'classnames';
 import { FormContext, FormItemContext } from './createContext';
 import Icon from '../icon';
 import { noop } from '../utils';
-import Transition from '../transition';
 import { ItemProps, triggerType } from './PropsType';
 
 Schema.warning = noop;
 
-class FormItem extends PureComponent<ItemProps, any> {
+class FormItem extends PureComponent<ItemProps & HTMLAttributes<HTMLDivElement>, any> {
   static contextType = FormContext;
-
   static defaultProps = {
-    prefixCls: 'za-form',
-    required: false,
+    prefixCls: 'ui-form',
   };
-
   static propTypes = {
-    prefixCls: PropTypes.string,
+    prop: PropTypes.string,
+    rules: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+    label: PropTypes.string,
     required: PropTypes.bool,
+    isRequired: PropTypes.bool,
   };
 
-  private initialData;
+  private initialData: any;
 
   private validateMessage: string;
 
-  private formItemInstance: any;
+  private formItemNode: RefObject<HTMLDivElement>;
 
   constructor(props) {
     super(props);
 
-    this.formItemInstance = createRef<HTMLDivElement>();
+    this.formItemNode = createRef<HTMLDivElement>();
     this.validateMessage = '';
     this.state = {
       validateStatus: '',
     };
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.initialData = this.recordInitialData();
     this.addFormItem();
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.removeFormItem();
   }
 
-  get fieldValue() {
+  get fieldValue () {
     const { model } = this.context;
     const { prop } = this.props;
-    const propArr = prop!.split('.');
-
-    return propArr.length > 1 ? model[propArr[0]][propArr[1]] : model[prop!];
+    if (prop && !model) {
+      throw new Error('Form Component must have model attribute when FormItem prop have defined');
+    }
+    if (prop) {
+      const propArr = prop.split('.');
+      return propArr.length > 1 ? model[propArr[0]][propArr[1]] : model[prop];
+    }
   }
 
-  getRules() {
+  getRules () {
     const { rules, prop } = this.props;
-    const { rules: contextRules } = this.context;
-    let formRules = contextRules;
-    const formItemRules = rules;
+    let formRules = this.context.rules;
+    let formItemRules = rules;
 
     formRules = formRules ? formRules[prop!] : [];
     return [].concat(formItemRules || formRules || []);
   }
 
-  getFilteredRules(trigger: triggerType) {
+  getFilteredRules (trigger: triggerType) {
     const rules = this.getRules();
     const filteredRules = rules.filter((rule: any) => !rule.trigger || rule.trigger.includes(trigger));
     return filteredRules;
@@ -80,18 +82,18 @@ class FormItem extends PureComponent<ItemProps, any> {
   }
 
   getControlNode() {
-    return this.formItemInstance.current;
+    return this.formItemNode.current;
   }
 
   handleFieldBlur = () => {
     Promise.resolve('blur').then(this.validateItem.bind(this));
-  };
+  }
 
   handleFieldChange = () => {
     Promise.resolve('change').then(this.validateItem.bind(this));
-  };
+  }
 
-  validateItem(trigger: triggerType, callback: (messge: string) => void = () => {}) {
+  validateItem (trigger: triggerType, callback = _ => {}) {
     const { prop } = this.props;
     const rules = this.getFilteredRules(trigger);
 
@@ -134,10 +136,9 @@ class FormItem extends PureComponent<ItemProps, any> {
     return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
   }
 
-  addFormItem() {
-    const { fields } = this.context;
+  addFormItem () {
     if ((this.props as ItemProps).prop) {
-      fields.push(this);
+      this.context.fields.push(this);
     }
   }
 
@@ -150,46 +151,50 @@ class FormItem extends PureComponent<ItemProps, any> {
   }
 
   renderLabel() {
-    const { id, label, prefixCls, prop, rules, required } = this.props;
-    const { labelWidth } = this.context;
+    const { id, label, isRequired, required, prefixCls, prop, rules } = this.props;
+    const { labelWidth, labelPosition } = this.context;
     const styleObj: any = {};
-    const star = (required || prop || rules) ? (
-      <span className={`${prefixCls}-item--required`}>
-        <Icon type="required" />
-      </span>
-    ) : null;
-    if (labelWidth) { styleObj.width = parseInt(labelWidth, 10); }
-
-    return 'label' in this.props
-      ? (
-        <label className="za-form-item__label" style={{ ...styleObj }} htmlFor={id || this.getId()}>
-          {star}
-          {label}
-        </label>
+    const star =
+      (required || isRequired || prop || rules) ? (
+        <span className={`${prefixCls}-item-required`}>
+          <Icon type="required" />
+        </span>
       ) : null;
+    if (labelWidth) { styleObj.width = parseInt(labelWidth, 10); }
+    if (labelPosition) { styleObj.textAlign = labelPosition; }
+
+    return label ? <label style={{ ...styleObj }} htmlFor={id || this.getId()}>{star}{label}</label> : null;
+  }
+
+  renderItemError() {
+    const { prefixCls } = this.props;
+    const { validateStatus } = this.state;
+    const showError = validateStatus === 'error';
+    const error = showError ? <div className={`${prefixCls}-item-error`}>{this.validateMessage}</div> : null;
+
+    return error;
   }
 
   render() {
-    const { validateStatus } = this.state;
-    const { className, children, style, prefixCls } = this.props;
+    const { props, state } = this;
+    const { validateStatus } = state;
+    const { className, children, style, prefixCls } = props;
     const cls = classnames({
       [`${prefixCls}-item`]: true,
       'has-error': validateStatus === 'error',
       [className!]: !!className,
     });
     const controlCls = classnames({
-      [`${prefixCls}-item__control`]: true,
+      [`${prefixCls}-item-control`]: true,
     });
 
     return (
       <FormItemContext.Provider value={this}>
-        <div className={cls} style={style} ref={this.formItemInstance}>
+        <div className={cls} style={style} ref={this.formItemNode}>
           {this.renderLabel()}
           <div className={controlCls} onBlur={this.handleFieldBlur} onChange={this.handleFieldChange}>
             {children}
-            <Transition name="scaleDown" visible={validateStatus === 'error'}>
-              <div className={`${prefixCls}-item__error`}>{this.validateMessage}</div>
-            </Transition>
+            {this.renderItemError()}
           </div>
         </div>
       </FormItemContext.Provider>

@@ -3,6 +3,7 @@ import cn from 'classnames';
 import debounce from '../utils/debounce';
 import Tag from '../tag';
 import Icon from '../icon';
+import Tooltip from '../tooltip';
 
 import PropsType, { ValueArray } from './PropsType';
 
@@ -14,7 +15,7 @@ const sizeValue = {
 };
 
 const Style = {
-  tagStyle: { maxWidth: 100 },
+  tagStyle: { maxWidth: '100%' },
   iconStyle: { fontSize: 'initial' },
 };
 
@@ -22,11 +23,8 @@ type BasicProps = React.HTMLAttributes<HTMLDivElement> & PropsType;
 
 class InputWithTags extends React.Component<BasicProps> {
   inputDiv: HTMLDivElement;
-
   tagListBox: HTMLDivElement;
-
   isComposition: boolean;
-
   debouncedOnInputChange: any;
 
   state = {
@@ -34,14 +32,34 @@ class InputWithTags extends React.Component<BasicProps> {
     compositionData: null,
   };
 
-  constructor(props) {
+  constructor (props) {
     super(props);
     this.debouncedOnInputChange = debounce(this.onInput, 300, false);
   }
 
+  onInput = (value) => {
+    if (this.props.disabled || this.isComposition) {
+      return;
+    }
+    if (typeof this.props.onSearchChange === 'function') {
+      this.props.onSearchChange(value);
+    }
+  }
+
+  onFocus = () => {
+    this.setState({
+      isFocus: true,
+    });
+  }
+
+  onBlur = () => {
+    this.setState({
+      isFocus: false,
+    });
+  }
+
   componentWillReceiveProps(nextProps: BasicProps) {
-    const { active } = this.props;
-    if (nextProps.active !== active) {
+    if (nextProps.active !== this.props.active) {
       // work without disabled and search prop;
       if (!nextProps.disabled && (nextProps.search || nextProps.remoteSearch)) {
         if (nextProps.active) {
@@ -53,47 +71,26 @@ class InputWithTags extends React.Component<BasicProps> {
     }
   }
 
-  onInput = (value) => {
-    if (this.props.disabled || this.isComposition) {
-      return;
-    }
-    if (typeof this.props.onSearchChange === 'function') {
-      this.props.onSearchChange(value);
-    }
-  };
-
-  onFocus = () => {
-    this.setState({
-      isFocus: true,
-    });
-  };
-
-  onBlur = () => {
-    this.setState({
-      isFocus: false,
-    });
-  };
-
   tagListBoxref = (e) => {
     this.tagListBox = e;
-  };
+  }
 
   onTagBoxClick = () => {
     const { active, search, remoteSearch, value } = this.props;
     if (active && (search || remoteSearch) && Array.isArray(value)) {
       this.inputDiv.focus();
     }
-  };
+  }
 
   onCompositionStart = () => {
     this.isComposition = true;
-  };
+  }
 
   onCompositionUpdate = (e: React.CompositionEvent<HTMLDivElement>) => {
     this.setState({
       compositionData: e.data,
     });
-  };
+  }
 
   onCompositionEnd = (value) => {
     this.isComposition = false;
@@ -101,21 +98,17 @@ class InputWithTags extends React.Component<BasicProps> {
       compositionData: null,
     });
     this.onInput(value);
-  };
+  }
 
   render() {
-    const {
-      search, remoteSearch, value, searchValue, placeholder, active, onDeleteTag, onSearchChange, size,
-      radius, disabled, ...others
-    } = this.props;
+    const { search, remoteSearch, value, searchValue, placeholder, active, onDeleteTag, onSearchChange, size, tagTheme,
+      radius, disabled, ...others } = this.props;
     const { compositionData, isFocus } = this.state;
     let showPlaceHolder = false;
     if (
-      (((search || remoteSearch) && !isFocus && value === null)
-      || (typeof value === 'string' && value.length === 0))
-      // eslint-disable-next-line no-mixed-operators
-      || !value
-      // eslint-disable-next-line no-mixed-operators
+      (((search || remoteSearch) && !isFocus && value === null) ||
+      (typeof value === 'string' && value.length === 0)) ||
+      !value
       && !compositionData
     ) {
       showPlaceHolder = true;
@@ -123,65 +116,74 @@ class InputWithTags extends React.Component<BasicProps> {
 
     const searchValueStyle = { display: isFocus && searchValue ? 'none' : 'inline-block' };
 
-    const tagSizeHeight: number = (size ? sizeValue[size] : 32) - 10;
+    let tagSizeHeight: number = (size ? sizeValue[size] : 32) - 10;
 
     let tagList;
 
     // if value is array, make a Tag list;
     if (Array.isArray(value)) {
       tagList = (value as Array<ValueArray>).map((elem, index) => {
+        const tag = (
+          <Tag
+            isDisabled={disabled}
+            theme={tagTheme}
+            title={Array.isArray(elem.value) ? elem.value.join('') : String(elem.value)}
+            style={{ ...Style.tagStyle, height: tagSizeHeight, lineHeight: tagSizeHeight + 'px' }}
+            isRadius={radius}
+            key={elem.key}
+            onClose={(e) => {
+              e.stopPropagation();
+              if (typeof onDeleteTag === 'function') {
+                setTimeout(() => {
+                  onDeleteTag(e, elem.key, elem.value, index);
+                });
+              }
+            }}
+          >
+            {elem.value}
+          </Tag>
+        );
         return (
           <div
-            className="za-tag-list-box"
+            className="ui-tag-list-box"
             key={elem.key}
             ref={this.tagListBoxref}
           >
-            <Tag
-              style={{ ...Style.tagStyle, height: tagSizeHeight, lineHeight: `${tagSizeHeight}px` }}
-              key={elem.key}
-              closable
-              onClick={() => {}}
-              onClose={(e) => {
-                e.stopPropagation();
-                if (typeof onDeleteTag === 'function') {
-                  setTimeout(() => {
-                    onDeleteTag(e, elem.key, elem.value, index);
-                  });
-                }
-              }}
-            >
-              {elem.value}
-            </Tag>
-          </div>
+            {
+              elem.title ? (
+                <Tooltip title={elem.title}>
+                  {tag}
+                </Tooltip>
+              ) : tag
+            }
+          </div >
         );
       });
     } else {
       tagList = (
-        <div style={searchValueStyle} className="value-text">
+        <div title={value as string} style={searchValueStyle} className="value-text">
           {compositionData || value}
         </div>
       );
     }
 
     const boxCls = cn({
-      'za-tag-input-box': true,
-      'is-radius': radius,
-      'za-tag-input-box--active': active,
-      'is-disabled': disabled,
+      'ui-tag-input-box': true,
+      'radius': radius,
+      'ui-tag-input-box-active': active,
+      'disabled': disabled,
       [`size-${size}`]: !!size,
     });
 
-    return (
-      <div
-        className={boxCls}
-        onClick={this.onTagBoxClick}
-        {...others}
-      >
-        {tagList}
-        {
-        (search || remoteSearch) && (
-        <div
-          className="za-tag-input__div"
+    return <div
+      className={boxCls}
+      onClick={this.onTagBoxClick}
+      {...others}
+    >
+      {tagList}
+      {
+        (search || remoteSearch) && <div
+          className="ui-tag-input-div"
           contentEditable={!disabled && (search || remoteSearch)}
           onInput={(e) => { this.debouncedOnInputChange((e.target as HTMLDivElement).textContent); }}
           onFocus={this.onFocus}
@@ -191,12 +193,10 @@ class InputWithTags extends React.Component<BasicProps> {
           onCompositionEnd={(e) => { this.onCompositionEnd((e.target as HTMLDivElement).textContent); }}
           ref={(e) => { this.inputDiv = e as HTMLDivElement; }}
         />
-        )
       }
-        {showPlaceHolder && <span style={searchValueStyle} className="za-tag-input__div-placeholder">{placeholder}</span>}
-        <Icon style={Style.iconStyle} className="arrow-bottom" type="arrow-bottom" />
-      </div>
-    );
+      {showPlaceHolder && <span style={searchValueStyle} className="ui-tag-input-div-placeholder">{placeholder}</span>}
+      <Icon style={Style.iconStyle} className="arrow-bottom" type="arrow-bottom" />
+    </div>;
   }
 }
 

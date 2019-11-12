@@ -14,13 +14,13 @@ exports[`PopConfirm renders PopConfirm correctly 1`] = `
           class="ui-popover-actions"
         >
           <button
-            class="zw-button zw-button--default zw-button--radius"
+            class="ui-button radius theme-default"
             type="button"
           >
             取消
           </button>
           <button
-            class="zw-button zw-button--primary zw-button--radius"
+            class="ui-button radius theme-info"
             type="button"
           >
             确定
@@ -31,12 +31,14 @@ exports[`PopConfirm renders PopConfirm correctly 1`] = `
         class="ui-popover-arrow"
       />
     </div>
-    <button
-      class="zw-button zw-button--default zw-button--radius"
-      type="button"
-    >
-      Delete
-    </button>
+    <span>
+      <button
+        class="ui-button radius theme-default"
+        type="button"
+      >
+        Delete
+      </button>
+    </span>
   </div>
 </div>
 `;

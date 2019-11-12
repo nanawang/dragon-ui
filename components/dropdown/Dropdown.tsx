@@ -1,21 +1,21 @@
-/* eslint-disable no-bitwise */
+// tslint:disable:no-bitwise
 import React, { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import classnames from 'classnames';
 import events from '../utils/events';
 import throttle from '../utils/throttle';
-import domUtil from '../utils/dom';
 import { propsType, StateType } from './PropsType';
-
 type ReactMouseEvent = (e: React.MouseEvent) => void;
 
 function getOffsetElem(elem: HTMLElement) {
   let parentElem = elem.parentNode;
   while (parentElem) {
     if (parentElem instanceof HTMLElement) {
-      if (parentElem.style.position === 'fixed'
-        || window.getComputedStyle(parentElem).position === 'fixed'
-        || parentElem === document.body) {
+      if (parentElem.style.position === 'fixed' ||
+        window.getComputedStyle(parentElem).position === 'fixed' ||
+        parentElem === document.body ||
+        mountedInstance.find((item) => item.div === parentElem)
+      ) {
         return parentElem;
       }
       parentElem = parentElem.parentNode;
@@ -28,26 +28,32 @@ function getOffsetElem(elem: HTMLElement) {
 
 // 获取元素坐标
 function getElemPosition(elem: HTMLElement, relativeElem: HTMLElement = document.body) {
-  let parentElem = elem.offsetParent;
-  const position: { top: number; left: number } = {
+  let parentElem = elem.parentElement;
+  let offsetParentElem = elem.offsetParent;
+  const position: { top: number, left: number } = {
     top: elem.offsetTop,
     left: elem.offsetLeft,
   };
-  while (relativeElem.contains(parentElem)) {
+  while (relativeElem.contains(parentElem!)) {
     if (parentElem instanceof HTMLElement) {
       if (relativeElem === parentElem) {
         return position;
       }
-      position.top += parentElem.offsetTop;
-      position.left += parentElem.offsetLeft;
-      parentElem = parentElem.offsetParent;
+      if (offsetParentElem === parentElem) {
+        position.top += parentElem.offsetTop;
+        position.left += parentElem.offsetLeft;
+        offsetParentElem = parentElem.offsetParent;
+      }
+      position.top -= parentElem.scrollTop;
+      position.left -= parentElem.scrollLeft;
+      parentElem = parentElem.parentElement;
     }
   }
   return position;
 }
 
 // todo [首次不创建]
-
+// bottom top left center right
 const placementMap = {
   bottomLeft: 5,
   bottomCenter: 9,
@@ -68,18 +74,16 @@ const defaultProps = {
   zIndex: 2018,
 };
 
-const mountedInstance = new Set<Dropdown>();
+const mountedInstance: Dropdown[] = [];
 
 export default class Dropdown extends React.Component<propsType, StateType> {
   static defaultProps = defaultProps;
-
   // 隐藏全部的Dropdown
   static hide(): void {
     mountedInstance.forEach((instance) => {
       instance.props.onVisibleChange(false);
     });
   }
-
   // 显示全部的Dropdown 除了disable
   static show(): void {
     mountedInstance.forEach((instance) => {
@@ -94,18 +98,15 @@ export default class Dropdown extends React.Component<propsType, StateType> {
     });
   }
 
-  // 用于存储已生成的全部实例的Set
-  // private static mountedInstance: Set<Dropdown> = new Set();
   // 根据定位点计算定位信息
   private static calcPosition(
     placement: propsType['placement'] = 'bottomLeft',
     width: number,
     height: number,
     dropWidth: number,
-    dropHeight: number,
-  ): { top: number; left: number } {
-    let top = 0;
-    let left = 0;
+    dropHeight: number): { top: number, left: number } {
+    let top: number = 0;
+    let left: number = 0;
     const placementCode = placementMap[placement];
     if (placementCode & 1) {
       top = height;
@@ -121,7 +122,6 @@ export default class Dropdown extends React.Component<propsType, StateType> {
       top, left,
     };
   }
-
   private static createDivBox(): HTMLDivElement {
     const div = document.createElement('div');
     div.style.setProperty('position', 'absolute');
@@ -137,117 +137,37 @@ export default class Dropdown extends React.Component<propsType, StateType> {
       left: 0,
       top: 0,
     },
+    isPending: false,
     animationState: null,
-    // eslint-disable-next-line react/no-unused-state
     animationProps: null,
   };
 
   DropdownContentEvent: {
-    onMouseLeave?: () => void;
-    onMouseEnter?: () => void;
+    onMouseLeave?: () => void,
+    onMouseEnter?: () => void,
   } = {};
 
   triggerEvent: {
-    onClick?: ReactMouseEvent;
-    onMouseEnter?: ReactMouseEvent;
-    onMouseLeave?: ReactMouseEvent;
-    onContextMenu?: ReactMouseEvent;
+    onClick?: ReactMouseEvent,
+    onMouseEnter?: ReactMouseEvent,
+    onMouseLeave?: ReactMouseEvent,
+    onContextMenu?: ReactMouseEvent,
   } = {};
 
   // 窗口大小变化的时候实时调整定位
   onWindowResize: () => void;
-
-  // 可滚动父容器滚动的时候调整定位
-  onParentScroll: () => void;
-
-  private div: HTMLDivElement = Dropdown.createDivBox();
-
+  div: HTMLDivElement = Dropdown.createDivBox();
   private triggerBox!: HTMLDivElement;
-
   private DropdownContent!: HTMLDivElement;
-
   private popContainer!: HTMLElement;
-
-  private scrollParent!: HTMLElement;
-
-  private isHoverOnDropContent = false;
-
+  private isHoverOnDropContent: boolean = false;
   private hiddenTimer: number | undefined;
-
   private triggerBoxOffsetHeight!: number;
 
   constructor(props: Readonly<{ children?: ReactNode }> & Readonly<propsType>) {
     super(props);
     this.setEventObject(props.trigger);
     this.onWindowResize = throttle(this.reposition, 300);
-    this.onParentScroll = this.reposition;
-  }
-
-  componentDidMount() {
-    const { getPopupContainer, visible, placement } = this.props;
-    if (typeof getPopupContainer === 'function') {
-      this.popContainer = getPopupContainer();
-      this.popContainer.style.position = 'relative';
-    } else {
-      this.popContainer = getOffsetElem(this.triggerBox);
-    }
-    this.popContainer.appendChild(this.div);
-    if (visible) {
-      const { left, top } = this.getDropdownPosition(placement);
-      this.setState({
-        positionInfo: {
-          left,
-          top,
-        },
-      });
-    }
-    this.scrollParent = domUtil.getScrollParent(this.triggerBox);
-    events.on(document, 'click', this.onDocumentClick);
-    events.on(window, 'resize', this.onWindowResize);
-    events.on(this.scrollParent, 'scroll', this.onParentScroll);
-
-    // 存储当前实例，方便静态方法统一处理
-    mountedInstance.add(this);
-    this.triggerBoxOffsetHeight = this.triggerBox.offsetHeight;
-  }
-
-  componentWillReceiveProps(nextProps: Readonly<{ children?: ReactNode }> & Readonly<propsType>) {
-    const { visible, trigger } = this.props;
-    if (nextProps.visible === visible) {
-      return;
-    }
-    if (nextProps.trigger !== trigger) {
-      this.setEventObject(nextProps.trigger);
-    }
-    if (nextProps.visible) {
-      this.enter(() => {
-        if (nextProps.visible) {
-          this.setState({
-            positionInfo: this.getDropdownPosition(nextProps.placement),
-          });
-        }
-      });
-    } else {
-      this.leave();
-    }
-  }
-
-  componentDidUpdate() {
-    const height = this.triggerBox.offsetHeight;
-    if (height !== this.triggerBoxOffsetHeight) {
-      this.reposition();
-      this.triggerBoxOffsetHeight = height;
-    }
-  }
-
-  componentWillUnmount() {
-    events.off(document, 'click', this.onDocumentClick);
-    events.off(window, 'click', this.onWindowResize);
-    events.off(this.scrollParent, 'scroll', this.onParentScroll);
-    mountedInstance.delete(this);
-    setTimeout(() => {
-      this.popContainer.removeChild(this.div);
-    });
   }
 
   // 根据trigger方式不同绑定事件
@@ -262,7 +182,7 @@ export default class Dropdown extends React.Component<propsType, StateType> {
     } else if (triggerType === 'contextMenu') {
       this.triggerEvent.onContextMenu = this.onTrigger;
     }
-  };
+  }
 
   // 显示与否的回调函数
   onTrigger = (e: React.MouseEvent): void => {
@@ -279,8 +199,10 @@ export default class Dropdown extends React.Component<propsType, StateType> {
     } else if (type === 'mouseenter') {
       if (this.props.visible === false) {
         this.props.onVisibleChange(true);
-      } else if (this.hiddenTimer) {
-        clearTimeout(this.hiddenTimer);
+      } else {
+        if (this.hiddenTimer) {
+          clearTimeout(this.hiddenTimer);
+        }
       }
     } else if (type === 'mouseleave') {
       // 缓冲一点一时间给间隙
@@ -291,7 +213,7 @@ export default class Dropdown extends React.Component<propsType, StateType> {
         }
       }, 300);
     }
-  };
+  }
 
   // 鼠标放到弹框上的时候，设置变量
   onDropdownContentMouseEnter = (): void => {
@@ -302,7 +224,7 @@ export default class Dropdown extends React.Component<propsType, StateType> {
     if (this.isHoverOnDropContent === false) {
       this.isHoverOnDropContent = true;
     }
-  };
+  }
 
   onDropdownContentMouseLeave = (): void => {
     this.isHoverOnDropContent = false;
@@ -310,29 +232,83 @@ export default class Dropdown extends React.Component<propsType, StateType> {
     this.hiddenTimer = setTimeout(() => {
       this.props.onVisibleChange(false);
     }, 300);
-  };
+  }
+
+  componentDidMount() {
+    if (typeof this.props.getPopupContainer === 'function') {
+      this.popContainer = this.props.getPopupContainer();
+      this.popContainer.style.position = 'relative';
+    } else {
+      this.popContainer = getOffsetElem(this.triggerBox);
+    }
+    this.popContainer.appendChild(this.div);
+    if (this.props.visible) {
+      const { left, top } = this.getDropdownPosition(this.props.placement);
+      this.setState({
+        positionInfo: {
+          left,
+          top,
+        },
+      });
+    }
+    // this.scrollParent = domUtil.getScrollParent(this.triggerBox);
+    events.on(document, 'click', this.onDocumentClick);
+    events.on(window, 'resize', this.onWindowResize);
+    document.addEventListener('scroll', this.onScroll, true);
+
+    // 存储当前实例，方便静态方法统一处理
+    mountedInstance.push(this);
+    this.triggerBoxOffsetHeight = this.triggerBox.offsetHeight;
+  }
+
+  componentDidUpdate() {
+    const height = this.triggerBox.offsetHeight;
+    if (height !== this.triggerBoxOffsetHeight) {
+      this.reposition();
+      this.triggerBoxOffsetHeight = height;
+    }
+  }
+  // 页面滚动的时候
+  onScroll = (e: Event) => {
+    if (e.target !== e.currentTarget) {
+      if (this.props.visible && (e.target as HTMLElement).contains(this.triggerBox)) {
+        this.reposition();
+      }
+    }
+  }
 
   // 点击外部的时候
   onDocumentClick = (e: MouseEvent): void => {
-    const { hideOnClick, onVisibleChange } = this.props;
-    if (this.props.disabled === true || this.state.visible === false) {
+    if (this.props.disabled === true || this.props.visible === false) {
       return;
     }
     const target = e.target as Node;
-    // eslint-disable-next-line no-empty
     if (this.div.contains(target) || this.triggerBox.contains(target)) {
-
+      return;
     } else {
-      // eslint-disable-next-line no-lonely-if
-      if (hideOnClick) {
-        onVisibleChange(false);
+      // this.props.onVisibleChange(false);
+      if (this.props.hideOnClick) {
+        this.props.onVisibleChange(false);
       }
     }
-  };
+  }
+
+  reposition = () => {
+    if (!this.props.visible || this.props.disabled) {
+      return;
+    }
+    const { left, top } = this.getDropdownPosition(this.props.placement);
+    if (left === this.state.positionInfo.left && top === this.state.positionInfo.top) {
+      return;
+    }
+    this.setState({
+      positionInfo: { left, top },
+    });
+  }
 
   // 获取元素的定位信息
   getDropdownPosition(placement: propsType['placement'] = 'bottomLeft') {
-    const rectInfo = getElemPosition(this.triggerBox, this.popContainer);
+    let rectInfo = getElemPosition(this.triggerBox, this.popContainer);
     const { offsetWidth, offsetHeight } = this.DropdownContent;
     const computerStyle = window.getComputedStyle(this.DropdownContent);
     const marginTop = parseFloat(this.DropdownContent.style.marginTop || computerStyle.marginTop || '0');
@@ -344,44 +320,48 @@ export default class Dropdown extends React.Component<propsType, StateType> {
       offsetWidth,
       offsetHeight,
     );
-    const offset = placement.startsWith('bottom') ? 5 : -5;
-    let scrollLeft = 0;
-    let scrollTop = 0;
-    if (this.scrollParent !== this.popContainer && this.popContainer.contains(this.scrollParent)) {
-      scrollLeft = domUtil.getScrollLeftValue(this.scrollParent);
-      scrollTop = domUtil.getScrollTopValue(this.scrollParent);
-    }
+    const offset = placementMap[placement] & 1 ? 5 : -5;
     return {
-      left: rectInfo.left + left - marginLeft - scrollLeft,
-      top: rectInfo.top + top - marginTop + offset - scrollTop,
+      left: rectInfo.left + left - marginLeft,
+      top: rectInfo.top + top - marginTop + offset,
     };
   }
 
-  reposition = () => {
-    if (!this.state.visible || this.props.disabled) {
+  componentWillReceiveProps(nextProps: Readonly<{ children?: ReactNode }> & Readonly<propsType>) {
+    if (nextProps.visible === this.props.visible) {
       return;
     }
-    const { left, top } = this.getDropdownPosition(this.props.placement);
-    if (left === this.state.positionInfo.left && top === this.state.positionInfo.top) {
-      return;
+    if (nextProps.trigger !== this.props.trigger) {
+      this.setEventObject(nextProps.trigger);
     }
-    this.setState({
-      positionInfo: { left, top },
-    });
-  };
-
-  onAniEnd = (e: React.AnimationEvent) => {
-    if (e.type.toLowerCase().endsWith('animationend')) {
-      this.setState({
-        visible: this.props.visible,
-        animationState: null,
+    if (nextProps.visible) {
+      this.enter(() => {
+        if (nextProps.visible) {
+          this.setState({
+            positionInfo: this.getDropdownPosition(nextProps.placement),
+          });
+        }
       });
+    } else {
+      this.leave();
     }
-  };
+  }
+
+  componentWillUnmount() {
+    events.off(document, 'click', this.onDocumentClick);
+    events.off(window, 'click', this.onWindowResize);
+    document.removeEventListener('scroll', this.onScroll, true);
+    const index = mountedInstance.indexOf(this);
+    mountedInstance.splice(index, 1);
+    setTimeout(() => {
+      this.popContainer.removeChild(this.div);
+    });
+  }
 
   enter(callback: () => void): void {
     this.setState({
       visible: true,
+      isPending: true,
       animationState: 'enter',
     }, callback);
   }
@@ -389,8 +369,23 @@ export default class Dropdown extends React.Component<propsType, StateType> {
   leave(): void {
     this.setState({
       visible: true,
+      isPending: true,
       animationState: 'leave',
     });
+  }
+
+  onTransitionEnd = () => {
+    if (this.state.animationState === 'leave') {
+      this.setState({
+        visible: false,
+        isPending: false,
+      });
+    } else {
+      this.setState({
+        visible: true,
+        isPending: false,
+      });
+    }
   }
 
   render() {
@@ -411,17 +406,16 @@ export default class Dropdown extends React.Component<propsType, StateType> {
       onVisibleChange,
       getPopupContainer,
       triggerBoxStyle,
+      triggerProps,
       ...others
     } = this.props;
 
-    const { positionInfo, animationState, visible: stateVisible } = this.state;
-    // 根据placement判断向上动画还是向下动画
-    const animationProps = (placementMap[placement] & 1) ? 'scaleDown' : 'scaleUp';
+    const { positionInfo } = this.state;
     const cls = classnames({
       [prefixCls!]: true,
       radius: 'radius' in this.props || isRadius,
       [className!]: !!className,
-      [`${animationProps}-${animationState}`]: !!animationState,
+      active: visible,
     });
 
     const dropdownBoxStyle: React.CSSProperties = {
@@ -429,41 +423,46 @@ export default class Dropdown extends React.Component<propsType, StateType> {
       ...style,
       ...positionInfo,
       position: 'absolute',
-      animationDuration: '300ms',
-      // eslint-disable-next-line no-nested-ternary
-      display: disabled ? 'none' : (stateVisible ? 'block' : 'none'),
       overflow: 'hidden',
       zIndex,
     };
 
-    return (
-      <>
-        <div
-          className={`${prefixCls}-trigger-box`}
-          style={triggerBoxStyle}
-          ref={(e) => { this.triggerBox = e as HTMLDivElement; }}
-          {...this.triggerEvent}
-        >
-          {children}
-        </div>
-        {
+    const triggerBoxProps = triggerProps ? {
+      ...triggerProps,
+      className: classnames({
+        [`${triggerProps.className}`]: !!triggerProps.className,
+        [`${prefixCls}-trigger-box`]: true,
+      }),
+    } : {
+        className: classnames({
+          [`${prefixCls}-trigger-box`]: true,
+        }),
+      };
+
+    return <React.Fragment>
+      <div
+        className={`${prefixCls}-trigger-box`}
+        style={triggerBoxStyle}
+        ref={(e) => { this.triggerBox = e as HTMLDivElement; }}
+        {...this.triggerEvent}
+        {...triggerBoxProps}
+      >
+        {children}
+      </div>
+      {
         createPortal(
           <div
-            onAnimationEnd={this.onAniEnd}
             className={cls}
-            ref={(e) => {
-              this.DropdownContent = e as HTMLDivElement;
-            }}
+            ref={(e) => this.DropdownContent = e as HTMLDivElement}
             style={dropdownBoxStyle}
+            onTransitionEnd={this.onTransitionEnd}
             {...others}
             {...this.DropdownContentEvent}
           >
             {(notRenderInDisabledMode && disabled) ? null : overlay}
           </div>,
-          this.div,
-        )
+          this.div)
       }
-      </>
-    );
+    </React.Fragment>;
   }
 }
