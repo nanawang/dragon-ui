@@ -46,7 +46,9 @@ exports[`Form renders inline Form with label correctly 1`] = `
         class="ui-button radius theme-success"
         type="button"
       >
-        查询
+        <span>
+          查询
+        </span>
       </button>
     </div>
   </div>
@@ -106,7 +108,9 @@ exports[`Form renders inline Form with required fields and help correctly 1`] = 
         class="ui-button radius theme-success"
         type="button"
       >
-        查询
+        <span>
+          查询
+        </span>
       </button>
     </div>
   </div>
@@ -159,7 +163,9 @@ exports[`Form renders normal Form correctly 1`] = `
         class="ui-button radius theme-success"
         type="button"
       >
-        登录
+        <span>
+          登录
+        </span>
       </button>
     </div>
   </div>

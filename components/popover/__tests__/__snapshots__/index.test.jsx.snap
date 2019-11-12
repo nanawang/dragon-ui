@@ -16,14 +16,14 @@ exports[`Popover behaves correctly when clicking on mask 1`] = `
         class="ui-popover-arrow"
       />
     </div>
-    <span>
-      <button
-        class="ui-button radius theme-default"
-        type="button"
-      >
+    <button
+      class="zw-button zw-button--default zw-button--radius"
+      type="button"
+    >
+      <span>
         Delete
-      </button>
-    </span>
+      </span>
+    </button>
   </div>
 </div>
 `;
@@ -41,14 +41,14 @@ exports[`Popover renders Popover correctly with customized props 1`] = `
         class="ui-popover-arrow"
       />
     </div>
-    <span>
-      <button
-        class="ui-button radius theme-default"
-        type="button"
-      >
+    <button
+      class="zw-button zw-button--default zw-button--radius"
+      type="button"
+    >
+      <span>
         Delete
-      </button>
-    </span>
+      </span>
+    </button>
   </div>
 </div>
 `;
@@ -69,14 +69,14 @@ exports[`Popover renders Popover correctly with mask 1`] = `
         class="ui-popover-arrow"
       />
     </div>
-    <span>
-      <button
-        class="ui-button radius theme-default"
-        type="button"
-      >
+    <button
+      class="zw-button zw-button--default zw-button--radius"
+      type="button"
+    >
+      <span>
         Delete
-      </button>
-    </span>
+      </span>
+    </button>
   </div>
 </div>
 `;
@@ -94,14 +94,14 @@ exports[`Popover renders Popover correctly with render props 1`] = `
         class="ui-popover-arrow"
       />
     </div>
-    <span>
-      <button
-        class="ui-button radius theme-default"
-        type="button"
-      >
+    <button
+      class="zw-button zw-button--default zw-button--radius"
+      type="button"
+    >
+      <span>
         Delete
-      </button>
-    </span>
+      </span>
+    </button>
   </div>
 </div>
 `;
@@ -119,14 +119,14 @@ exports[`Popover renders normal Popover correctly 1`] = `
         class="ui-popover-arrow"
       />
     </div>
-    <span>
-      <button
-        class="ui-button radius theme-default"
-        type="button"
-      >
+    <button
+      class="zw-button zw-button--default zw-button--radius"
+      type="button"
+    >
+      <span>
         Delete
-      </button>
-    </span>
+      </span>
+    </button>
   </div>
 </div>
 `;
